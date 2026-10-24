@@ -19,6 +19,7 @@ include(KDECompilerSettings NO_POLICY_SCOPE)
 include(KDEClangFormat)
 include(ECMSetupVersion)
 include(ECMEnableSanitizers)
+include(ECMQtDeclareLoggingCategory)
 include(FeatureSummary)
 
 ecm_setup_version(${PROJECT_VERSION}
@@ -46,8 +47,15 @@ qt_policy(SET QTP0004 NEW)
 set(HIDSIGHT_UDEV_RULES_DIR "lib/udev/rules.d" CACHE PATH
     "Directory for the udev rule, relative to the install prefix")
 
+add_subdirectory(src/hidpp)
 add_subdirectory(src/app)
 add_subdirectory(data)
+
+ecm_qt_install_logging_categories(
+    EXPORT HIDSIGHT
+    FILE hidsight.categories
+    DESTINATION ${KDE_INSTALL_LOGGINGCATEGORIESDIR}
+)
 
 file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES CONFIGURE_DEPENDS
     ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_DIR}/src/*.h
