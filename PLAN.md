@@ -2,9 +2,9 @@
 
 Status: 2026-10-24 - name decided (Hidsight), stack decided (section
 12), devices on the maintainer's desk read by the Python spike
-(section 6). Phases 0 and 1 done: the protocol library and
-`hidsight-cli` read both devices on the desk as the spike did, tests
-pass under ASan and UBSan, CI is green. Phase 2 is next.
+(section 6). Phases 0 and 1 done. Phase 2 in the working tree:
+discovery, sessions with events and the model run on the desk; tests
+pass under ASan and UBSan; CI has not run it yet.
 
 Hidsight is the maintainer's first desktop project after three Sailfish
 OS apps (SailVault, SailToken, SailTune) and the PineTime firmware
@@ -131,7 +131,7 @@ Kirigami Addons, qqc2-desktop-style, Breeze icons, KI18n, KConfig,
 KCoreAddons, KStatusNotifierItem, KNotifications, KDBusAddons; CMake with
 extra-cmake-modules and Ninja; libudev; hidraw directly.
 
-## 6. HID++ facts verified on the desk (2026-10-24, `spikes/enumerate.py`)
+## 6. HID++ facts verified on the desk (2026-10-24, `spikes/enumerate.py`, `spikes/listen.py`, `hidsight-cli`)
 
 Receiver: Logi Bolt Receiver 046d:c548 on `hid-generic`; the kernel's
 `hid_logitech_dj` does not know the id, so there is no power_supply
@@ -150,12 +150,20 @@ Both devices speak HID++ 4.5. Indices 3 to 6 answer HID++ 1.0 error
 
 - HID++ 1.0 to the receiver (index 0xFF) carries no software id. Short
   register read is sub id 0x81, long register read 0x83. Register 0x02
-  returns the number of connected devices in payload byte 1. Register
+  returns the number of paired devices in payload byte 1 (still 2 with
+  the mouse switched off). Register
   0xB5 read long with sub register 0x50 + index returns Bolt pairing
   information; its layout is not decoded. Sub registers 0x60 + index
   return zeros, so names come from feature 0x0005. Error replies carry
-  sub id 0x8F; codes seen: 0x02 invalid address, 0x09 resource error,
-  0x0B invalid parameter value.
+  sub id 0x8F; codes seen: 0x02 invalid address, 0x04 connection
+  failed, 0x09 resource error, 0x0B invalid parameter value.
+- A request to a paired device that is switched off or asleep gets
+  HID++ 1.0 error 0x04 from the receiver at once, without waking the
+  device; an empty slot gets 0x09. The receiver also answers 0x04 when
+  two programs send to the same device at the same moment (seen with
+  the app and the CLI on one node), so the session tries a device once
+  more after 1 s before it shows it as not reachable.
+- The MX Keys S fell asleep about 3 minutes after the last key press.
 - HID++ 2.0: `[report id, device index, feature index, function << 4 |
   software id, params]`; errors carry feature index 0xFF. Devices
   answer in a long report even to a short request.
@@ -168,9 +176,27 @@ Both devices speak HID++ 4.5. Indices 3 to 6 answer HID++ 1.0 error
   and engineering features never reach the UI.
 - A full read of both devices by `hidsight-cli` (ping, feature table,
   name, firmware, battery, DPI; 100 requests) took 3.3 s with both
-  devices awake and no retry, about 33 ms per request. Reading the
-  feature table first does not fit criterion 5; Phase 2 reads the
-  battery before the rest or keeps the feature table.
+  devices awake and no retry. The first request to a device after a
+  pause takes about 0.5 s, every further one 15 to 22 ms. Reading the
+  feature table first does not fit criterion 5, so the session first
+  reads ping, name and battery of every device (about 0.7 s each) and
+  only then the rest.
+- Events arrive without Hidsight enabling anything: receiver register
+  0x00 (notification flags) reads `00 00 00`, and still the devices
+  send HID++ 2.0 events with software id 0. On every change of the
+  charging cable of the MX Keys S a Unified Battery event with the
+  layout of getStatus (the contact bounces: three events within
+  350 ms). On switching the MX Master 3S on and on waking the MX Keys S
+  with a key press a WirelessDeviceStatus (0x1d4b) event `01 01 01`,
+  then a battery event. Switching off and falling asleep send nothing;
+  key presses send nothing on the HID++ node.
+- Replugging the receiver: the devices answer 0x04 until they
+  reconnect. The MX Keys S was listed with its battery 1.63 s after the
+  receiver was plugged in; the MX Master 3S once it was moved.
+- The DeviceFwVersion entity count carries the unit id of the device
+  (the same bytes as in the Bolt pairing information), and each
+  firmware entry four bytes of unknown meaning that differ between the
+  devices. Captures zero both; Hidsight parses neither.
 - Unplugging the charging cable of the MX Keys S between two reads by
   `hidsight-cli`: the second read showed 100 %, discharging, no external
   power (Unified Battery status bytes 2 and 3).
@@ -292,8 +318,10 @@ reporting upstream; German translation.
   6.31. Set the minimum to what is tested; lower it only when a
   distribution asks and a build proves it.
 - **Battery re-read interval.** Events should carry the day; the timer
-  is a safety net. Start with 15 minutes and measure whether the
-  devices wake for it.
+  is a safety net. Start with 15 minutes. Verified on the desk: a read
+  of a sleeping device gets 0x04 at once and does not wake it. A device
+  that falls asleep stays "online" in the list until the next re-read
+  finds it; how to show "asleep or off" is part of Phase 3.
 - **Autostart mechanism.** XDG autostart desktop file written by the
   app, or a KConfig-managed entry. Decide in Phase 4.
 - **Icon.** A symbolic tray icon set for the battery levels and an app
