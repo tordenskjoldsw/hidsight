@@ -29,13 +29,18 @@ ecm_setup_version(${PROJECT_VERSION}
 )
 
 find_package(Qt6 ${QT_MIN_VERSION} REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2 Widgets)
-find_package(KF6 ${KF_MIN_VERSION} REQUIRED COMPONENTS CoreAddons I18n)
+find_package(KF6 ${KF_MIN_VERSION} REQUIRED COMPONENTS Config CoreAddons I18n)
 find_package(UDev REQUIRED)
 
 find_package(KF6Kirigami ${KF_MIN_VERSION})
 set_package_properties(KF6Kirigami PROPERTIES
     TYPE RUNTIME
     DESCRIPTION "QML components of the window"
+)
+find_package(KF6KirigamiAddons 1.15.0)
+set_package_properties(KF6KirigamiAddons PROPERTIES
+    TYPE RUNTIME
+    DESCRIPTION "Form cards, delegates and the about page"
 )
 find_package(KF6QQC2DesktopStyle ${KF_MIN_VERSION})
 set_package_properties(KF6QQC2DesktopStyle PROPERTIES

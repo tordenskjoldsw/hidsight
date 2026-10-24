@@ -25,6 +25,7 @@ constexpr unsigned LogitechVendor = 0x046D;
 struct HidId {
     unsigned bus = 0;
     unsigned vendor = 0;
+    unsigned product = 0;
 };
 
 // HID_ID of the parent hid device, for example "0003:0000046D:0000C548".
@@ -39,8 +40,9 @@ std::optional<HidId> parseHidId(const char *value)
     }
     bool busOk = false;
     bool vendorOk = false;
-    const HidId id{parts[0].toUInt(&busOk, 16), parts[1].toUInt(&vendorOk, 16)};
-    if (!busOk || !vendorOk) {
+    bool productOk = false;
+    const HidId id{parts[0].toUInt(&busOk, 16), parts[1].toUInt(&vendorOk, 16), parts[2].toUInt(&productOk, 16)};
+    if (!busOk || !vendorOk || !productOk) {
         return std::nullopt;
     }
     return id;
@@ -179,7 +181,7 @@ void DeviceMonitor::consider(udev_device *device)
     }
     qCDebug(HIDSIGHT_APP) << "HID++ node" << devnode;
     m_nodes.insert(devnode);
-    Q_EMIT nodeAdded(devnode);
+    Q_EMIT nodeAdded(devnode, u"%1:%2"_s.arg(id->vendor & 0xFFFF, 4, 16, QLatin1Char('0')).arg(id->product & 0xFFFF, 4, 16, QLatin1Char('0')));
 }
 
 void DeviceMonitor::forget(const QString &devnode)

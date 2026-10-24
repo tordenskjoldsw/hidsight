@@ -2,30 +2,61 @@
 // SPDX-License-Identifier: MIT
 
 #include "devicemodel.h"
+#include "devicetexts.h"
 
 #include "hidpp/keys.h"
+
+#include <KLocalizedString>
 
 #include <algorithm>
 
 using namespace Qt::StringLiterals;
+using namespace std::chrono_literals;
 
 namespace
 {
 
-QString mainFirmware(const hidpp::DeviceState &state)
+QString key(const QString &receiver, std::uint8_t index)
 {
+    return u"%1#%2"_s.arg(receiver).arg(index);
+}
+
+QVariantList firmware(const hidpp::DeviceState &state)
+{
+    QVariantList entries;
     if (!state.firmware) {
-        return {};
+        return entries;
     }
     for (const hidpp::FirmwareEntry &entry : state.firmware->entries) {
-        if (entry.type == hidpp::FirmwareType::MainApplication) {
-            return entry.version();
+        entries.append(QVariantMap{{u"label"_s, DeviceTexts::firmwareTypeText(entry.type)}, {u"version"_s, entry.version()}});
+    }
+    return entries;
+}
+
+QVariantList features(const hidpp::DeviceState &state)
+{
+    QVariantList entries;
+    for (const hidpp::FeatureEntry &feature : state.features.entries()) {
+        if (feature.isVisible()) {
+            entries.append(QVariantMap{{u"title"_s, DeviceTexts::featureTitle(feature.id)}, {u"detail"_s, DeviceTexts::featureDetail(feature.id)}});
         }
     }
-    return {};
+    return entries;
 }
 
 } // namespace
+
+DeviceModel::DeviceModel(QObject *parent)
+    : QAbstractListModel(parent)
+{
+    m_clock.setInterval(1min);
+    connect(&m_clock, &QTimer::timeout, this, [this] {
+        if (!m_rows.empty()) {
+            Q_EMIT dataChanged(index(0), index(count() - 1), {LastSeenTextRole});
+        }
+    });
+    m_clock.start();
+}
 
 int DeviceModel::count() const
 {
@@ -44,32 +75,59 @@ QVariant DeviceModel::data(const QModelIndex &index, int role) const
     }
     const Row &row = m_rows[std::size_t(index.row())];
     const hidpp::DeviceState &state = row.state;
+    const hidpp::DeviceKind kind = state.name ? state.name->kind : hidpp::DeviceKind::Unknown;
     switch (role) {
     case Qt::DisplayRole:
     case NameRole:
-        return state.name ? state.name->name : QString();
+        return state.name ? state.name->name : i18nc("@info device without a name yet", "Device %1", state.index);
     case KindRole:
-        return QString(hidpp::key(state.name ? state.name->kind : hidpp::DeviceKind::Unknown));
+        return QString(hidpp::key(kind));
+    case KindTextRole:
+        return DeviceTexts::kindText(kind);
+    case IconNameRole:
+        return DeviceTexts::kindIconName(kind);
     case StatusRole:
         return QString(hidpp::key(state.status));
+    case StatusTextRole:
+        return DeviceTexts::statusText(state);
+    case OnlineRole:
+        return state.status == hidpp::DeviceStatus::Online;
     case BatteryPercentageRole:
         return state.battery && state.battery->percentage ? int(*state.battery->percentage) : -1;
     case BatteryLevelRole:
         return QString(hidpp::key(state.battery ? state.battery->level : hidpp::BatteryLevel::Unknown));
+    case BatteryLevelTextRole:
+        return state.battery ? DeviceTexts::levelText(state.battery->level) : QString();
     case ChargingRole:
         return QString(hidpp::key(state.battery ? state.battery->charging : hidpp::ChargingState::Unknown));
+    case ChargingTextRole:
+        return state.battery ? DeviceTexts::chargingText(state.battery->charging) : QString();
     case ExternalPowerRole:
         return state.battery && state.battery->externalPower.value_or(false);
+    case BatteryTextRole:
+        return state.battery ? DeviceTexts::batteryText(*state.battery) : QString();
+    case BatteryIconNameRole:
+        return DeviceTexts::batteryIconName(state.battery);
+    case LastSeenTextRole:
+        return DeviceTexts::lastSeenText(state.lastSeen);
     case FirmwareRole:
-        return mainFirmware(state);
+        return firmware(state);
     case DpiRole:
         return state.dpi && !state.dpi->sensorDpi.empty() ? int(state.dpi->sensorDpi.front()) : 0;
     case ReportRateRole:
         return state.reportRate ? int(state.reportRate->milliseconds) : 0;
+    case ProtocolRole:
+        return state.protocol.major > 0 ? u"%1.%2"_s.arg(state.protocol.major).arg(state.protocol.minor) : QString();
+    case FeaturesRole:
+        return features(state);
     case CompleteRole:
         return state.complete;
     case ReceiverRole:
         return row.receiver;
+    case ReceiverTextRole:
+        return DeviceTexts::receiverText(row.receiverId);
+    case KeyRole:
+        return key(row.receiver, state.index);
     default:
         return {};
     }
@@ -80,23 +138,47 @@ QHash<int, QByteArray> DeviceModel::roleNames() const
     return {
         {NameRole, "name"},
         {KindRole, "kind"},
+        {KindTextRole, "kindText"},
+        {IconNameRole, "iconName"},
         {StatusRole, "status"},
+        {StatusTextRole, "statusText"},
+        {OnlineRole, "online"},
         {BatteryPercentageRole, "batteryPercentage"},
         {BatteryLevelRole, "batteryLevel"},
+        {BatteryLevelTextRole, "batteryLevelText"},
         {ChargingRole, "charging"},
+        {ChargingTextRole, "chargingText"},
         {ExternalPowerRole, "externalPower"},
+        {BatteryTextRole, "batteryText"},
+        {BatteryIconNameRole, "batteryIconName"},
+        {LastSeenTextRole, "lastSeenText"},
         {FirmwareRole, "firmware"},
         {DpiRole, "dpi"},
         {ReportRateRole, "reportRate"},
+        {ProtocolRole, "protocol"},
+        {FeaturesRole, "features"},
         {CompleteRole, "complete"},
         {ReceiverRole, "receiver"},
+        {ReceiverTextRole, "receiverText"},
+        {KeyRole, "key"},
     };
 }
 
-void DeviceModel::updateDevice(const QString &receiver, const hidpp::DeviceState &state)
+int DeviceModel::rowOf(const QString &deviceKey) const
+{
+    for (std::size_t row = 0; row < m_rows.size(); ++row) {
+        if (key(m_rows[row].receiver, m_rows[row].state.index) == deviceKey) {
+            return int(row);
+        }
+    }
+    return -1;
+}
+
+void DeviceModel::updateDevice(const QString &receiver, const QString &receiverId, const hidpp::DeviceState &state)
 {
     const auto it = find(receiver, state.index);
     if (it != m_rows.end()) {
+        it->receiverId = receiverId;
         it->state = state;
         const QModelIndex changed = index(int(it - m_rows.begin()));
         Q_EMIT dataChanged(changed, changed);
@@ -108,7 +190,7 @@ void DeviceModel::updateDevice(const QString &receiver, const hidpp::DeviceState
     });
     const int rowNumber = int(position - m_rows.begin());
     beginInsertRows({}, rowNumber, rowNumber);
-    m_rows.insert(position, Row{receiver, state});
+    m_rows.insert(position, Row{receiver, receiverId, state});
     endInsertRows();
     Q_EMIT countChanged();
 }

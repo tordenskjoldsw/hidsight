@@ -5,17 +5,20 @@
 
 #include "devicemodel.h"
 #include "devicemonitor.h"
+#include "devicenames.h"
 
-#include <QElapsedTimer>
 #include <QObject>
 #include <QSet>
 
 #include <map>
 #include <memory>
 
+class DeviceDetails;
+
 namespace hidpp
 {
 class ReceiverSession;
+struct DeviceState;
 }
 
 // Opens every receiver node DeviceMonitor finds, keeps a session on it for as
@@ -26,27 +29,40 @@ class DeviceManager : public QObject
     Q_PROPERTY(DeviceModel *devices READ devices CONSTANT)
     // A receiver node exists but the udev rule does not grant access to it.
     Q_PROPERTY(bool accessDenied READ accessDenied NOTIFY accessDeniedChanged)
+    // False when udev is not available and no receiver can be found.
+    Q_PROPERTY(bool watching READ watching NOTIFY watchingChanged)
 
 public:
-    explicit DeviceManager(QObject *parent = nullptr);
+    explicit DeviceManager(DeviceNames names = DeviceNames(), QObject *parent = nullptr);
     ~DeviceManager() override;
 
-    // False when udev is not available.
-    bool start();
+    void start();
 
     DeviceModel *devices();
     bool accessDenied() const;
+    bool watching() const;
+
+    // Reads every device again: the battery of those that answer, and those
+    // that did not answer last time.
+    Q_INVOKABLE void refresh();
+    // A live view of one device for the device page; the caller owns it.
+    Q_INVOKABLE DeviceDetails *details(const QString &key);
 
 Q_SIGNALS:
     void accessDeniedChanged();
+    void watchingChanged();
 
 private:
-    void addNode(const QString &node);
+    void addNode(const QString &node, const QString &receiverId);
     void removeNode(const QString &node);
+    void updateDevice(const QString &node, hidpp::DeviceState state);
     void setDenied(const QString &node, bool denied);
 
     DeviceMonitor m_monitor;
     DeviceModel m_model;
+    DeviceNames m_names;
     std::map<QString, std::unique_ptr<hidpp::ReceiverSession>> m_sessions;
+    std::map<QString, QString> m_receiverIds;
     QSet<QString> m_deniedNodes;
+    bool m_watching = false;
 };

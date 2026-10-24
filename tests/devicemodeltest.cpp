@@ -50,9 +50,9 @@ private Q_SLOTS:
         QAbstractItemModelTester tester(&model, QAbstractItemModelTester::FailureReportingMode::QtTest);
         QSignalSpy count(&model, &DeviceModel::countChanged);
 
-        model.updateDevice(QStringLiteral("/dev/hidraw7"), mouse());
-        model.updateDevice(QStringLiteral("/dev/hidraw3"), mouse());
-        model.updateDevice(QStringLiteral("/dev/hidraw3"), keyboard());
+        model.updateDevice(QStringLiteral("/dev/hidraw7"), QStringLiteral("046d:c548"), mouse());
+        model.updateDevice(QStringLiteral("/dev/hidraw3"), QStringLiteral("046d:c548"), mouse());
+        model.updateDevice(QStringLiteral("/dev/hidraw3"), QStringLiteral("046d:c548"), keyboard());
         QCOMPARE(model.rowCount(), 3);
         QCOMPARE(count.size(), 3);
         QCOMPARE(model.index(0).data(DeviceModel::NameRole).toString(), QStringLiteral("MX Keys S"));
@@ -63,8 +63,8 @@ private Q_SLOTS:
     void exposesKeysAndNumbers()
     {
         DeviceModel model;
-        model.updateDevice(QStringLiteral("/dev/hidraw3"), keyboard());
-        model.updateDevice(QStringLiteral("/dev/hidraw3"), mouse());
+        model.updateDevice(QStringLiteral("/dev/hidraw3"), QStringLiteral("046d:c548"), keyboard());
+        model.updateDevice(QStringLiteral("/dev/hidraw3"), QStringLiteral("046d:c548"), mouse());
 
         const QModelIndex first = model.index(0);
         QCOMPARE(first.data(DeviceModel::KindRole).toString(), QStringLiteral("keyboard"));
@@ -87,14 +87,14 @@ private Q_SLOTS:
     {
         DeviceModel model;
         QAbstractItemModelTester tester(&model, QAbstractItemModelTester::FailureReportingMode::QtTest);
-        model.updateDevice(QStringLiteral("/dev/hidraw3"), keyboard());
-        model.updateDevice(QStringLiteral("/dev/hidraw3"), mouse());
-        model.updateDevice(QStringLiteral("/dev/hidraw7"), keyboard());
+        model.updateDevice(QStringLiteral("/dev/hidraw3"), QStringLiteral("046d:c548"), keyboard());
+        model.updateDevice(QStringLiteral("/dev/hidraw3"), QStringLiteral("046d:c548"), mouse());
+        model.updateDevice(QStringLiteral("/dev/hidraw7"), QStringLiteral("046d:c548"), keyboard());
 
         QSignalSpy changed(&model, &DeviceModel::dataChanged);
         DeviceState asleep = keyboard();
         asleep.status = DeviceStatus::Unreachable;
-        model.updateDevice(QStringLiteral("/dev/hidraw3"), asleep);
+        model.updateDevice(QStringLiteral("/dev/hidraw3"), QStringLiteral("046d:c548"), asleep);
         QCOMPARE(changed.size(), 1);
         QCOMPARE(model.rowCount(), 3);
         QCOMPARE(model.index(0).data(DeviceModel::StatusRole).toString(), QStringLiteral("unreachable"));

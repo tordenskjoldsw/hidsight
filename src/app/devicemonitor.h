@@ -30,7 +30,8 @@ public:
     bool start();
 
 Q_SIGNALS:
-    void nodeAdded(const QString &devnode);
+    // receiverId is the USB vendor and product id, for example "046d:c548".
+    void nodeAdded(const QString &devnode, const QString &receiverId);
     void nodeRemoved(const QString &devnode);
 
 private:

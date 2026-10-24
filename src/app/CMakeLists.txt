@@ -3,9 +3,12 @@
 
 # Everything but main and QML, so the tests can link it.
 add_library(hidsight_app STATIC
+    devicedetails.cpp devicedetails.h
     devicemanager.cpp devicemanager.h
     devicemodel.cpp devicemodel.h
     devicemonitor.cpp devicemonitor.h
+    devicenames.cpp devicenames.h
+    devicetexts.cpp devicetexts.h
 )
 
 ecm_qt_declare_logging_category(hidsight_app
@@ -17,7 +20,10 @@ ecm_qt_declare_logging_category(hidsight_app
 )
 
 target_include_directories(hidsight_app PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(hidsight_app PUBLIC hidsight_hidpp Qt6::Core PRIVATE UDev::UDev)
+target_link_libraries(hidsight_app
+    PUBLIC hidsight_hidpp Qt6::Core KF6::ConfigCore
+    PRIVATE UDev::UDev KF6::CoreAddons KF6::I18n
+)
 
 add_executable(hidsight main.cpp)
 

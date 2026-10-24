@@ -6,12 +6,13 @@
 #include "hidpp/receiversession.h"
 
 #include <QAbstractListModel>
+#include <QTimer>
 
 #include <vector>
 
-// The devices of all receivers, one row each. QML reads names, stable keys
-// such as "keyboard" or "discharging" and numbers; never reports or feature
-// indices.
+// The devices of all receivers, one row each. QML reads translated texts,
+// icon names, stable keys such as "keyboard" and numbers; never reports or
+// feature indices.
 class DeviceModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -21,27 +22,43 @@ public:
     enum Role {
         NameRole = Qt::UserRole + 1,
         KindRole,
+        KindTextRole,
+        IconNameRole,
         StatusRole,
+        StatusTextRole,
+        OnlineRole,
         BatteryPercentageRole,
         BatteryLevelRole,
+        BatteryLevelTextRole,
         ChargingRole,
+        ChargingTextRole,
         ExternalPowerRole,
+        BatteryTextRole,
+        BatteryIconNameRole,
+        LastSeenTextRole,
         FirmwareRole,
         DpiRole,
         ReportRateRole,
+        ProtocolRole,
+        FeaturesRole,
         CompleteRole,
         ReceiverRole,
+        ReceiverTextRole,
+        KeyRole,
     };
     Q_ENUM(Role)
 
-    using QAbstractListModel::QAbstractListModel;
+    explicit DeviceModel(QObject *parent = nullptr);
 
     int count() const;
     int rowCount(const QModelIndex &parent = {}) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    void updateDevice(const QString &receiver, const hidpp::DeviceState &state);
+    // The row of the device with this key, or -1.
+    int rowOf(const QString &key) const;
+
+    void updateDevice(const QString &receiver, const QString &receiverId, const hidpp::DeviceState &state);
     void removeDevice(const QString &receiver, std::uint8_t index);
     void removeReceiver(const QString &receiver);
 
@@ -51,10 +68,13 @@ Q_SIGNALS:
 private:
     struct Row {
         QString receiver;
+        QString receiverId;
         hidpp::DeviceState state;
     };
 
     std::vector<Row>::iterator find(const QString &receiver, std::uint8_t index);
 
     std::vector<Row> m_rows;
+    // "5 minutes ago" ages; a minute is the finest step it shows.
+    QTimer m_clock;
 };
