@@ -89,13 +89,72 @@ QByteArray formatCaptureLine(const CaptureEntry &entry)
     return line;
 }
 
+namespace
+{
+
+constexpr std::uint8_t RootIndex = 0x00;
+constexpr std::uint8_t GetFeature = 0;
+constexpr std::uint8_t GetFeatureId = 1;
+constexpr std::uint8_t GetEntityCount = 0;
+constexpr std::uint8_t GetFwInfo = 1;
+constexpr std::uint16_t FeatureSetId = 0x0001;
+constexpr std::uint16_t DeviceFwVersionId = 0x0003;
+
+std::uint16_t featureIdAt(std::span<const std::uint8_t> params)
+{
+    return static_cast<std::uint16_t>((params[0] << 8) | params[1]);
+}
+
+} // namespace
+
+void IdentifierRedactor::observeRequest(const Report &request)
+{
+    m_request = request;
+}
+
+Report IdentifierRedactor::redact(const Report &report)
+{
+    if (!m_request || matchReply(*m_request, report) != ReplyMatch::Reply) {
+        return report;
+    }
+    const Report &request = *m_request;
+    const std::uint8_t device = request.deviceIndex();
+    const std::uint8_t function = request.address() >> 4;
+    const auto params = report.params();
+
+    if (request.subId() == RootIndex && function == GetFeature) {
+        const std::uint16_t id = featureIdAt(request.params());
+        if (id == FeatureSetId) {
+            m_featureSetIndex[device] = params[0];
+        } else if (id == DeviceFwVersionId) {
+            m_firmwareIndex[device] = params[0];
+        }
+        return report;
+    }
+    if (m_featureSetIndex[device] == request.subId() && function == GetFeatureId) {
+        if (featureIdAt(params) == DeviceFwVersionId) {
+            m_firmwareIndex[device] = request.params()[0];
+        }
+        return report;
+    }
+    if (m_firmwareIndex[device] == request.subId()) {
+        if (function == GetEntityCount) {
+            return report.withParamsZeroed(1, 4);
+        }
+        if (function == GetFwInfo) {
+            return report.withParamsZeroed(11, 4);
+        }
+    }
+    return report;
+}
+
 RecordingChannel::RecordingChannel(std::unique_ptr<Channel> inner, QIODevice *output, QObject *parent)
     : Channel(parent)
     , m_inner(std::move(inner))
     , m_output(output)
 {
     connect(m_inner.get(), &Channel::reportReceived, this, [this](const Report &report) {
-        write(CaptureEntry::Direction::Received, report);
+        write(CaptureEntry::Direction::Received, m_redactor.redact(report));
         Q_EMIT reportReceived(report);
     });
     connect(m_inner.get(), &Channel::disconnected, this, &Channel::disconnected);
@@ -105,6 +164,7 @@ RecordingChannel::~RecordingChannel() = default;
 
 std::optional<Error> RecordingChannel::send(const Report &report)
 {
+    m_redactor.observeRequest(report);
     write(CaptureEntry::Direction::Sent, report);
     return m_inner->send(report);
 }

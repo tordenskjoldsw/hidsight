@@ -81,6 +81,10 @@ public:
         return m_bytes[5];
     }
 
+    // A copy with count parameter bytes from offset set to zero; the range is
+    // clipped to the parameters.
+    Report withParamsZeroed(std::size_t offset, std::size_t count) const;
+
     bool operator==(const Report &other) const;
 
 private:

@@ -49,6 +49,16 @@ std::span<const std::uint8_t> Report::bytes() const
     return std::span<const std::uint8_t>(m_bytes).first(m_size);
 }
 
+Report Report::withParamsZeroed(std::size_t offset, std::size_t count) const
+{
+    Report copy = *this;
+    const std::size_t paramsSize = m_size - HeaderSize;
+    const std::size_t begin = std::min(offset, paramsSize);
+    const std::size_t end = std::min(begin + count, paramsSize);
+    std::ranges::fill(std::span<std::uint8_t>(copy.m_bytes).subspan(HeaderSize + begin, end - begin), std::uint8_t(0));
+    return copy;
+}
+
 bool Report::operator==(const Report &other) const
 {
     return std::ranges::equal(bytes(), other.bytes());

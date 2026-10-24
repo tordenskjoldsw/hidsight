@@ -95,6 +95,35 @@ private Q_SLOTS:
         QCOMPARE(output.data(), text);
     }
 
+    void redactsIdentifiers()
+    {
+        IdentifierRedactor redactor;
+        const auto exchange = [&redactor](const QByteArray &request, const QByteArray &reply) {
+            redactor.observeRequest(parseCapture(QByteArray("> " + request)).value().front().report);
+            return formatCaptureLine({CaptureEntry::Direction::Received, redactor.redact(parseCapture(QByteArray("< " + reply)).value().front().report)});
+        };
+        const QByteArray zeros(" 00 00 00 00 00 00 00 00 00 00 00 00 00");
+
+        // Device 1 names the index of DeviceFwVersion through Root getFeature.
+        exchange("10 01 00 0a 00 03 00", "11 01 00 0a 02 00 00" + zeros);
+        QCOMPARE(exchange("10 01 02 0a 00 00 00", "11 01 02 0a 03 de ad be ef 00 02 b3 78 00 00 00 00 00 01 00"),
+                 "< 11 01 02 0a 03 00 00 00 00 00 02 b3 78 00 00 00 00 00 01 00\n");
+        QCOMPARE(exchange("10 01 02 1a 01 00 00", "11 01 02 1a 00 52 42 4b 81 02 00 17 01 b3 78 12 34 56 78 00"),
+                 "< 11 01 02 1a 00 52 42 4b 81 02 00 17 01 b3 78 00 00 00 00 00\n");
+
+        // Device 2 names it through FeatureSet, as readFeatureTable does.
+        exchange("10 02 00 0a 00 01 00", "11 02 00 0a 01 00 00" + zeros);
+        exchange("10 02 01 1a 02 00 00", "11 02 01 1a 00 03 00" + zeros);
+        QCOMPARE(exchange("10 02 02 0a 00 00 00", "11 02 02 0a 03 ca fe ba be 00 02 b0 34 00 00 00 00 0a 01 00"),
+                 "< 11 02 02 0a 03 00 00 00 00 00 02 b0 34 00 00 00 00 0a 01 00\n");
+
+        // Other features and devices pass unchanged.
+        QCOMPARE(exchange("10 02 08 1a 00 00 00", "11 02 08 1a 55 08 00 00 00 00 00 00 00 00 00 00 00 00 00 00"),
+                 "< 11 02 08 1a 55 08 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n");
+        QCOMPARE(exchange("10 03 02 0a 00 00 00", "11 03 02 0a 03 de ad be ef 00 02 b3 78 00 00 00 00 00 01 00"),
+                 "< 11 03 02 0a 03 de ad be ef 00 02 b3 78 00 00 00 00 00 01 00\n");
+    }
+
     void retriesWhereTheCaptureHasNoAnswer()
     {
         const QByteArray text =

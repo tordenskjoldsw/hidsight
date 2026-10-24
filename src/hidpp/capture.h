@@ -8,7 +8,9 @@
 #include <QByteArray>
 #include <QPointer>
 
+#include <array>
 #include <memory>
+#include <optional>
 #include <vector>
 
 class QIODevice;
@@ -33,7 +35,25 @@ struct CaptureEntry {
 Result<std::vector<CaptureEntry>> parseCapture(QByteArrayView text);
 QByteArray formatCaptureLine(const CaptureEntry &entry);
 
-// Passes everything to another channel and writes each report to output.
+// Replaces the identifiers of a device in replies by zeros: the unit id in
+// the DeviceFwVersion entity count and four bytes of unknown meaning in each
+// firmware entry, which differ between devices of the desk. It learns the
+// feature index of DeviceFwVersion from the Root and FeatureSet replies that
+// pass by, so it needs every request and reply in order.
+class IdentifierRedactor
+{
+public:
+    void observeRequest(const Report &request);
+    Report redact(const Report &report);
+
+private:
+    std::optional<Report> m_request;
+    std::array<std::optional<std::uint8_t>, 256> m_featureSetIndex;
+    std::array<std::optional<std::uint8_t>, 256> m_firmwareIndex;
+};
+
+// Passes everything to another channel and writes each report to output,
+// with the identifiers zeroed (IdentifierRedactor).
 class RecordingChannel : public Channel
 {
     Q_OBJECT
@@ -50,6 +70,7 @@ private:
 
     std::unique_ptr<Channel> m_inner;
     QPointer<QIODevice> m_output;
+    IdentifierRedactor m_redactor;
 };
 
 // Plays a capture back: each request must be the next one sent in the

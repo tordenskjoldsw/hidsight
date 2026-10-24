@@ -74,7 +74,8 @@ hidsight-cli --json /dev/hidraw3
 `--record <file>` writes every report sent and received to a capture
 file, and `--replay <file>` reads a capture instead of a node. The tests
 replay captures recorded this way. A capture holds the raw reports of
-your devices; look at it before you share it.
+your devices; the unit ids of the devices are replaced by zeros. Look
+at it before you share it.
 
 ## Packaging
 

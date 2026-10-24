@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
     parser.addPositionalArgument(u"node"_s, i18n("The HID++ hidraw node of a receiver, for example /dev/hidraw3."));
     const QCommandLineOption jsonOption(u"json"_s, i18n("Print JSON instead of text."));
     const QCommandLineOption recordOption(u"record"_s,
-                                          i18n("Write every report sent and received to <file>. The file holds raw reports from the devices."),
+                                          i18n("Write every report sent and received to <file>. Device unit ids are replaced by zeros; the rest are raw reports."),
                                           i18nc("@info command line value", "file"));
     const QCommandLineOption replayOption(u"replay"_s,
                                           i18n("Read the reports from a capture <file> instead of a node."),
