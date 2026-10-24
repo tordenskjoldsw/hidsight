@@ -11,6 +11,8 @@ ecm_add_tests(
     LINK_LIBRARIES hidsight_hidpp Qt6::Test
 )
 
+ecm_add_test(devicemodeltest.cpp LINK_LIBRARIES hidsight_app Qt6::Test)
+
 foreach(test capturetest sessiontest)
     target_compile_definitions(${test} PRIVATE CAPTURE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/captures")
 endforeach()

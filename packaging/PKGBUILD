@@ -23,6 +23,7 @@ depends=(
   qqc2-desktop-style
   qt6-base
   qt6-declarative
+  systemd-libs
 )
 makedepends=(
   cmake

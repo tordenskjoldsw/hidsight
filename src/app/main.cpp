@@ -9,6 +9,7 @@
 #include <QQmlApplicationEngine>
 #include <QQuickStyle>
 
+#include "devicemanager.h"
 #include "hidsight-version.h"
 
 using namespace Qt::StringLiterals;
@@ -37,6 +38,9 @@ int main(int argc, char *argv[])
     about.setDesktopFileName(u"de.tordenskjold.hidsight"_s);
     KAboutData::setApplicationData(about);
     QApplication::setWindowIcon(QIcon::fromTheme(u"de.tordenskjold.hidsight"_s));
+
+    DeviceManager devices;
+    devices.start();
 
     QQmlApplicationEngine engine;
     KLocalization::setupLocalizedContext(&engine);

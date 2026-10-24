@@ -44,7 +44,7 @@ Hidsight needs Qt 6.12 and KDE Frameworks 6.31 or newer. On Arch Linux:
 ```sh
 sudo pacman -S --needed cmake extra-cmake-modules ninja qt6-base \
     qt6-declarative kirigami ki18n kcoreaddons qqc2-desktop-style \
-    appstream desktop-file-utils
+    systemd-libs appstream desktop-file-utils
 ```
 
 Build, test and run:

@@ -1,6 +1,24 @@
 # SPDX-FileCopyrightText: 2026 Tobias Kaminski
 # SPDX-License-Identifier: MIT
 
+# Everything but main and QML, so the tests can link it.
+add_library(hidsight_app STATIC
+    devicemanager.cpp devicemanager.h
+    devicemodel.cpp devicemodel.h
+    devicemonitor.cpp devicemonitor.h
+)
+
+ecm_qt_declare_logging_category(hidsight_app
+    HEADER app_logging.h
+    IDENTIFIER HIDSIGHT_APP
+    CATEGORY_NAME hidsight.app
+    DESCRIPTION "Hidsight application"
+    EXPORT HIDSIGHT
+)
+
+target_include_directories(hidsight_app PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(hidsight_app PUBLIC hidsight_hidpp Qt6::Core PRIVATE UDev::UDev)
+
 add_executable(hidsight main.cpp)
 
 # The QML files live in the top-level qml/ directory; the alias keeps their
@@ -20,6 +38,7 @@ qt_add_qml_module(hidsight
 target_include_directories(hidsight PRIVATE ${PROJECT_BINARY_DIR})
 
 target_link_libraries(hidsight PRIVATE
+    hidsight_app
     Qt6::Gui
     Qt6::Qml
     Qt6::Quick

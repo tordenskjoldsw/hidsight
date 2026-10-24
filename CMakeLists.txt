@@ -30,6 +30,7 @@ ecm_setup_version(${PROJECT_VERSION}
 
 find_package(Qt6 ${QT_MIN_VERSION} REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2 Widgets)
 find_package(KF6 ${KF_MIN_VERSION} REQUIRED COMPONENTS CoreAddons I18n)
+find_package(UDev REQUIRED)
 
 find_package(KF6Kirigami ${KF_MIN_VERSION})
 set_package_properties(KF6Kirigami PROPERTIES
