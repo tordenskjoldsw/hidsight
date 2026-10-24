@@ -1,0 +1,8 @@
+version = 1
+
+# Files whose format has no comment syntax, or that stay free of headers.
+[[annotations]]
+path = [".gitignore", "CMakePresets.json", "PLAN.md", "README.md", "spikes/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Tobias Kaminski"
+SPDX-License-Identifier = "MIT"
