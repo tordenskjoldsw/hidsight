@@ -3,11 +3,31 @@
 
 #include "qmltypes.h"
 
-DeviceManager *DeviceManagerForeign::create(QQmlEngine *engine, QJSEngine *scriptEngine)
+namespace
 {
-    Q_UNUSED(engine)
+
+// main() owns the singletons; the engine must not delete them.
+template<typename T>
+T *keepOwnership(T *instance, QJSEngine *scriptEngine)
+{
     Q_ASSERT(instance);
-    // main() owns it; the engine must not delete it.
     scriptEngine->setObjectOwnership(instance, QJSEngine::CppOwnership);
     return instance;
+}
+
+} // namespace
+
+DeviceManager *DeviceManagerForeign::create(QQmlEngine *, QJSEngine *scriptEngine)
+{
+    return keepOwnership(instance, scriptEngine);
+}
+
+AppSettings *AppSettingsForeign::create(QQmlEngine *, QJSEngine *scriptEngine)
+{
+    return keepOwnership(instance, scriptEngine);
+}
+
+Autostart *AutostartForeign::create(QQmlEngine *, QJSEngine *scriptEngine)
+{
+    return keepOwnership(instance, scriptEngine);
 }

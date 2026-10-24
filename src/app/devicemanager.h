@@ -48,12 +48,23 @@ public:
     // A live view of one device for the device page; the caller owns it.
     Q_INVOKABLE DeviceDetails *details(const QString &key);
 
+#ifdef HIDSIGHT_DEVELOPER
+    // Shows the devices of a capture instead of the receivers, to try out
+    // the window, the tray and the notifications without a device that runs
+    // down (PLAN.md Phase 4). False when the capture cannot be read.
+    bool startReplay(const QString &path);
+#endif
+
 Q_SIGNALS:
     void accessDeniedChanged();
     void watchingChanged();
+    // Every change of a device, with its remembered name filled in.
+    void deviceUpdated(const QString &key, const hidpp::DeviceState &state);
+    void deviceGone(const QString &key);
 
 private:
     void addNode(const QString &node, const QString &receiverId);
+    void attach(const QString &node, const QString &receiverId, std::unique_ptr<hidpp::ReceiverSession> session);
     void removeNode(const QString &node);
     void updateDevice(const QString &node, hidpp::DeviceState state);
     void setDenied(const QString &node, bool denied);

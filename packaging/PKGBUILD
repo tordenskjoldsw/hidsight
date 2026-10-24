@@ -19,9 +19,12 @@ depends=(
   hicolor-icon-theme
   kconfig
   kcoreaddons
+  kdbusaddons
   ki18n
   kirigami
   kirigami-addons
+  knotifications
+  kstatusnotifieritem
   qqc2-desktop-style
   qt6-base
   qt6-declarative

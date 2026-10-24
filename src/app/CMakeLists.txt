@@ -3,13 +3,17 @@
 
 # Everything but main and QML, so the tests can link it.
 add_library(hidsight_app STATIC
+    appsettings.cpp appsettings.h
+    autostart.cpp autostart.h
     batteryalerts.cpp batteryalerts.h
+    batterytray.cpp batterytray.h
     devicedetails.cpp devicedetails.h
     devicemanager.cpp devicemanager.h
     devicemodel.cpp devicemodel.h
     devicemonitor.cpp devicemonitor.h
     devicenames.cpp devicenames.h
     devicetexts.cpp devicetexts.h
+    notifier.cpp notifier.h
     traylook.cpp traylook.h
 )
 
@@ -24,8 +28,11 @@ ecm_qt_declare_logging_category(hidsight_app
 target_include_directories(hidsight_app PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(hidsight_app
     PUBLIC hidsight_hidpp Qt6::Core KF6::ConfigCore
-    PRIVATE UDev::UDev KF6::CoreAddons KF6::I18n
+    PRIVATE UDev::UDev Qt6::DBus Qt6::Widgets KF6::CoreAddons KF6::I18n KF6::Notifications KF6::StatusNotifierItem
 )
+if(HIDSIGHT_DEVELOPER)
+    target_compile_definitions(hidsight_app PUBLIC HIDSIGHT_DEVELOPER)
+endif()
 
 add_executable(hidsight main.cpp qmltypes.cpp qmltypes.h)
 
@@ -35,6 +42,7 @@ set(HIDSIGHT_QML_FILES
     ${PROJECT_SOURCE_DIR}/qml/Main.qml
     ${PROJECT_SOURCE_DIR}/qml/DevicesPage.qml
     ${PROJECT_SOURCE_DIR}/qml/DevicePage.qml
+    ${PROJECT_SOURCE_DIR}/qml/SettingsPage.qml
 )
 foreach(qml_file IN LISTS HIDSIGHT_QML_FILES)
     get_filename_component(qml_name ${qml_file} NAME)
@@ -57,6 +65,7 @@ target_link_libraries(hidsight PRIVATE
     Qt6::QuickControls2
     Qt6::Widgets
     KF6::CoreAddons
+    KF6::DBusAddons
     KF6::I18n
     KF6::I18nQml
 )

@@ -22,7 +22,8 @@
             "inherits": "base",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_COMPILE_WARNING_AS_ERROR": "ON"
+                "CMAKE_COMPILE_WARNING_AS_ERROR": "ON",
+                "HIDSIGHT_DEVELOPER": "ON"
             }
         },
         {
@@ -32,7 +33,8 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_COMPILE_WARNING_AS_ERROR": "ON",
-                "ECM_ENABLE_SANITIZERS": "address;undefined"
+                "ECM_ENABLE_SANITIZERS": "address;undefined",
+                "HIDSIGHT_DEVELOPER": "ON"
             }
         },
         {

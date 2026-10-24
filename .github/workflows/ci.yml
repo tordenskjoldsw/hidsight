@@ -13,7 +13,7 @@ permissions:
 env:
   BUILD_DEPS: >-
     base-devel git cmake extra-cmake-modules ninja clang
-    qt6-base qt6-declarative kirigami kirigami-addons ki18n kconfig kcoreaddons qqc2-desktop-style systemd-libs
+    qt6-base qt6-declarative kirigami kirigami-addons ki18n kconfig kcoreaddons kdbusaddons knotifications kstatusnotifieritem qqc2-desktop-style systemd-libs
     appstream desktop-file-utils
 
 jobs:

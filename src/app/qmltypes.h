@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "appsettings.h"
+#include "autostart.h"
 #include "devicedetails.h"
 #include "devicemanager.h"
 #include "devicemodel.h"
@@ -23,6 +25,30 @@ public:
     static inline DeviceManager *instance = nullptr;
 
     static DeviceManager *create(QQmlEngine *engine, QJSEngine *scriptEngine);
+};
+
+struct AppSettingsForeign {
+    Q_GADGET
+    QML_FOREIGN(AppSettings)
+    QML_NAMED_ELEMENT(Settings)
+    QML_SINGLETON
+
+public:
+    static inline AppSettings *instance = nullptr;
+
+    static AppSettings *create(QQmlEngine *engine, QJSEngine *scriptEngine);
+};
+
+struct AutostartForeign {
+    Q_GADGET
+    QML_FOREIGN(Autostart)
+    QML_NAMED_ELEMENT(Autostart)
+    QML_SINGLETON
+
+public:
+    static inline Autostart *instance = nullptr;
+
+    static Autostart *create(QQmlEngine *engine, QJSEngine *scriptEngine);
 };
 
 struct DeviceModelForeign {

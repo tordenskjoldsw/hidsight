@@ -16,11 +16,6 @@ using namespace std::chrono_literals;
 namespace
 {
 
-QString key(const QString &receiver, std::uint8_t index)
-{
-    return u"%1#%2"_s.arg(receiver).arg(index);
-}
-
 QVariantList firmware(const hidpp::DeviceState &state)
 {
     QVariantList entries;
@@ -127,7 +122,7 @@ QVariant DeviceModel::data(const QModelIndex &index, int role) const
     case ReceiverTextRole:
         return DeviceTexts::receiverText(row.receiverId);
     case KeyRole:
-        return key(row.receiver, state.index);
+        return keyFor(row.receiver, state.index);
     default:
         return {};
     }
@@ -167,11 +162,37 @@ QHash<int, QByteArray> DeviceModel::roleNames() const
 int DeviceModel::rowOf(const QString &deviceKey) const
 {
     for (std::size_t row = 0; row < m_rows.size(); ++row) {
-        if (key(m_rows[row].receiver, m_rows[row].state.index) == deviceKey) {
+        if (keyFor(m_rows[row].receiver, m_rows[row].state.index) == deviceKey) {
             return int(row);
         }
     }
     return -1;
+}
+
+QString DeviceModel::keyFor(const QString &receiver, std::uint8_t index)
+{
+    return u"%1#%2"_s.arg(receiver).arg(index);
+}
+
+std::vector<hidpp::DeviceState> DeviceModel::states() const
+{
+    std::vector<hidpp::DeviceState> states;
+    states.reserve(m_rows.size());
+    for (const Row &row : m_rows) {
+        states.push_back(row.state);
+    }
+    return states;
+}
+
+QStringList DeviceModel::keysOf(const QString &receiver) const
+{
+    QStringList keys;
+    for (const Row &row : m_rows) {
+        if (row.receiver == receiver) {
+            keys << keyFor(row.receiver, row.state.index);
+        }
+    }
+    return keys;
 }
 
 void DeviceModel::updateDevice(const QString &receiver, const QString &receiverId, const hidpp::DeviceState &state)

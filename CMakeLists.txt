@@ -28,8 +28,8 @@ ecm_setup_version(${PROJECT_VERSION}
     VERSION_HEADER ${CMAKE_CURRENT_BINARY_DIR}/hidsight-version.h
 )
 
-find_package(Qt6 ${QT_MIN_VERSION} REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2 Widgets)
-find_package(KF6 ${KF_MIN_VERSION} REQUIRED COMPONENTS Config CoreAddons I18n)
+find_package(Qt6 ${QT_MIN_VERSION} REQUIRED COMPONENTS Core DBus Gui Qml Quick QuickControls2 Widgets)
+find_package(KF6 ${KF_MIN_VERSION} REQUIRED COMPONENTS Config CoreAddons DBusAddons I18n Notifications StatusNotifierItem)
 find_package(UDev REQUIRED)
 
 find_package(KF6Kirigami ${KF_MIN_VERSION})
@@ -50,6 +50,9 @@ set_package_properties(KF6QQC2DesktopStyle PROPERTIES
 
 qt_policy(SET QTP0001 NEW)
 qt_policy(SET QTP0004 NEW)
+
+# Tools for trying out the UI without real devices; never in a package.
+option(HIDSIGHT_DEVELOPER "Build the developer tools into the app (hidsight --replay)" OFF)
 
 set(HIDSIGHT_UDEV_RULES_DIR "lib/udev/rules.d" CACHE PATH
     "Directory for the udev rule, relative to the install prefix")

@@ -57,6 +57,11 @@ public:
 
     // The row of the device with this key, or -1.
     int rowOf(const QString &key) const;
+    // What identifies a device for QML and the notifications.
+    static QString keyFor(const QString &receiver, std::uint8_t index);
+    // The devices in row order, for the tray.
+    std::vector<hidpp::DeviceState> states() const;
+    QStringList keysOf(const QString &receiver) const;
 
     void updateDevice(const QString &receiver, const QString &receiverId, const hidpp::DeviceState &state);
     void removeDevice(const QString &receiver, std::uint8_t index);

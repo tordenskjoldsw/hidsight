@@ -9,6 +9,8 @@ Kirigami.ApplicationWindow {
     id: root
 
     title: i18nc("@title:window", "Hidsight")
+    // main() shows the window, unless Hidsight starts in the background.
+    visible: false
 
     width: Kirigami.Units.gridUnit * 44
     height: Kirigami.Units.gridUnit * 32
@@ -31,6 +33,12 @@ Kirigami.ApplicationWindow {
             },
             Kirigami.Action {
                 separator: true
+            },
+            Kirigami.Action {
+                icon.name: "configure"
+                text: i18nc("@action:inmenu", "Configure Hidsight…")
+                shortcut: StandardKey.Preferences
+                onTriggered: root.pageStack.layers.push(Qt.createComponent("de.tordenskjold.hidsight", "SettingsPage"))
             },
             Kirigami.Action {
                 icon.name: "help-about"

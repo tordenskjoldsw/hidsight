@@ -5,6 +5,7 @@ install(PROGRAMS de.tordenskjold.hidsight.desktop DESTINATION ${KDE_INSTALL_APPD
 install(FILES de.tordenskjold.hidsight.metainfo.xml DESTINATION ${KDE_INSTALL_METAINFODIR})
 install(FILES icons/de.tordenskjold.hidsight.svg DESTINATION ${KDE_INSTALL_ICONDIR}/hicolor/scalable/apps)
 install(FILES 70-hidsight.rules DESTINATION ${HIDSIGHT_UDEV_RULES_DIR})
+install(FILES hidsight.notifyrc DESTINATION ${KDE_INSTALL_KNOTIFYRCDIR})
 
 if(BUILD_TESTING)
     # ECM's appstreamtest only checks installed files; these check the
