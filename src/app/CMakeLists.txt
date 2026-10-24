@@ -3,12 +3,14 @@
 
 # Everything but main and QML, so the tests can link it.
 add_library(hidsight_app STATIC
+    batteryalerts.cpp batteryalerts.h
     devicedetails.cpp devicedetails.h
     devicemanager.cpp devicemanager.h
     devicemodel.cpp devicemodel.h
     devicemonitor.cpp devicemonitor.h
     devicenames.cpp devicenames.h
     devicetexts.cpp devicetexts.h
+    traylook.cpp traylook.h
 )
 
 ecm_qt_declare_logging_category(hidsight_app
