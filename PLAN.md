@@ -163,7 +163,13 @@ Both devices speak HID++ 4.5. Indices 3 to 6 answer HID++ 1.0 error
   two programs send to the same device at the same moment (seen with
   the app and the CLI on one node), so the session tries a device once
   more after 1 s before it shows it as not reachable.
-- The MX Keys S fell asleep about 3 minutes after the last key press.
+- A resting MX Keys S still answers: from 19:39 to 19:50 it answered a
+  re-read every minute without a key press, the first request of each
+  taking 0.6 to 1.25 s instead of 15 ms. The receiver answered 0x04 for
+  it only once (17:42, about 3 minutes after the last key press and
+  shortly after its cable was unplugged); that deeper sleep could not
+  be brought about on purpose. A switched-off device gets 0x04 every
+  time.
 - HID++ 2.0: `[report id, device index, feature index, function << 4 |
   software id, params]`; errors carry feature index 0xFF. Devices
   answer in a long report even to a short request.
