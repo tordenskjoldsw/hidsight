@@ -2,9 +2,9 @@
 
 Status: 2026-10-24 - name decided (Hidsight), stack decided (section
 12), devices on the maintainer's desk read by the Python spike
-(section 6). Phases 0 to 3 done: the window lists the devices with
-battery and a device page, follows events, runs in Breeze light and
-dark; tests pass under ASan and UBSan, CI is green. Phase 4 is next.
+(section 6). Phases 0 to 3 done. Phase 4 in the working tree: tray
+item, notifications, settings and autostart run on the desk; CI has not
+run it yet.
 
 Hidsight is the maintainer's first desktop project after three Sailfish
 OS apps (SailVault, SailToken, SailTune) and the PineTime firmware
@@ -345,10 +345,12 @@ Decided:
   the colour scheme. No icon set of Hidsight's own.
 - 2026-10-24: autostart goes through the background portal
   (org.freedesktop.portal.Background, RequestBackground with autostart),
-  which Plasma 6 supports and which keeps working under Flatpak. Whether
-  it accepts an installed, unsandboxed Hidsight is to be verified on the
-  desk in Phase 4; if not, Hidsight writes an XDG autostart file
-  instead.
+  which Plasma 6 supports and which keeps working under Flatpak.
+  Verified on the desk with the installed package: Qt registers the app
+  id with the host portal registry, and RequestBackground wrote
+  ~/.config/autostart/de.tordenskjold.hidsight.desktop (marked
+  X-XDP-Autostart, Exec=hidsight --background). From a build that is
+  not installed the registration fails, as the desktop file is missing.
 - 2026-10-24: the app icon is a keyboard with a mouse above it inside a
   blue ring that is open like a gauge, in Breeze colours: the state of
   the devices at a glance, and not tied to the battery, since a later
