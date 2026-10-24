@@ -7,6 +7,7 @@
 #include "dispatcher.h"
 #include "probe.h"
 
+#include <QDateTime>
 #include <QObject>
 #include <QTimer>
 
@@ -37,6 +38,8 @@ struct DeviceState {
     std::uint8_t index = 0;
     DeviceStatus status = DeviceStatus::Reading;
     std::optional<Error> error;
+    // When the device last answered or sent an event (UTC).
+    QDateTime lastSeen;
     // The feature table and everything after it have been read.
     bool complete = false;
     ProtocolVersion protocol;

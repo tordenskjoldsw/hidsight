@@ -410,7 +410,11 @@ DeviceState &ReceiverSession::stateFor(std::uint8_t index)
 
 void ReceiverSession::publish(std::uint8_t index)
 {
-    Q_EMIT deviceChanged(m_devices.at(index));
+    DeviceState &state = m_devices.at(index);
+    if (state.status == DeviceStatus::Online) {
+        state.lastSeen = QDateTime::currentDateTimeUtc();
+    }
+    Q_EMIT deviceChanged(state);
 }
 
 } // namespace hidpp

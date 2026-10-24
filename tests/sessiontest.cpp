@@ -166,6 +166,51 @@ const QByteArray SleepingDevice = R"(
 < 11 01 03 00 31 04 00 00
 )";
 
+// One awake device at index 1 with FeatureSet at 1 and UnifiedBattery at 2,
+// read completely; then a re-read that finds it asleep (0x04) twice.
+const QByteArray FallsAsleep = R"(
+> 10 ff 81 02 00 00 00
+< 10 ff 81 02 00 01 00
+> 10 01 00 1a 00 00 5a
+< 11 01 00 1a 04 05 5a
+> 10 01 00 0a 00 05 00
+< 11 01 00 0a 00
+> 10 01 00 0a 10 04 00
+< 11 01 00 0a 02
+> 10 01 02 0a 00 00 00
+< 11 01 02 0a 0f 02
+> 10 01 02 1a 00 00 00
+< 11 01 02 1a 50 04 00 00
+> 10 02 00 1a 00 00 5a
+< 10 02 8f 00 1a 09 00
+> 10 03 00 1a 00 00 5a
+< 10 03 8f 00 1a 09 00
+> 10 04 00 1a 00 00 5a
+< 10 04 8f 00 1a 09 00
+> 10 05 00 1a 00 00 5a
+< 10 05 8f 00 1a 09 00
+> 10 06 00 1a 00 00 5a
+< 10 06 8f 00 1a 09 00
+> 10 01 00 1a 00 00 5a
+< 11 01 00 1a 04 05 5a
+> 10 01 00 0a 00 01 00
+< 11 01 00 0a 01
+> 10 01 01 0a 00 00 00
+< 11 01 01 0a 02
+> 10 01 01 1a 01 00 00
+< 11 01 01 1a 00 01
+> 10 01 01 1a 02 00 00
+< 11 01 01 1a 10 04
+> 10 01 02 0a 00 00 00
+< 11 01 02 0a 0f 02
+> 10 01 02 1a 00 00 00
+< 11 01 02 1a 50 04 00 00
+> 10 01 00 0a 10 04 00
+< 10 01 8f 00 0a 04 00
+> 10 01 00 1a 00 00 5a
+< 10 01 8f 00 1a 04 00
+)";
+
 } // namespace
 
 class SessionTest : public QObject
@@ -249,6 +294,35 @@ private Q_SLOTS:
         QCOMPARE(state->battery->level, BatteryLevel::Good);
         QCOMPARE(result.finalDevices.size(), 1u);
         QVERIFY(result.removed.empty());
+    }
+
+    void marksADeviceThatFellAsleepOnReread()
+    {
+        auto channel = std::make_unique<ReplayChannel>(parseCapture(padLongReports(FallsAsleep)).value());
+        ReplayChannel *replay = channel.get();
+        ReceiverSession session(std::move(channel));
+        session.setTimeout(50ms);
+        std::vector<DeviceState> published;
+        connect(&session, &ReceiverSession::deviceChanged, this, [&published](const DeviceState &state) {
+            published.push_back(state);
+        });
+        session.start();
+
+        QTRY_VERIFY_WITH_TIMEOUT(!published.empty() && published.back().complete, 5000);
+        QCOMPARE(published.back().status, DeviceStatus::Online);
+        QCOMPARE(published.back().battery->percentage, std::optional<std::uint8_t>(80));
+        const QDateTime seen = published.back().lastSeen;
+        QVERIFY(seen.isValid());
+
+        // What the Refresh action does after the device went quiet.
+        session.rereadAll();
+        QTRY_VERIFY_WITH_TIMEOUT(published.back().status == DeviceStatus::Unreachable, 5000);
+        QCOMPARE(published.back().error, (Error{ErrorKind::Protocol10, 0x04}));
+        // The last reading stays, with the time it was taken.
+        QCOMPARE(published.back().battery->percentage, std::optional<std::uint8_t>(80));
+        QCOMPARE(published.back().lastSeen, seen);
+        QVERIFY(!replay->mismatch());
+        QVERIFY(replay->isAtEnd());
     }
 
     void failsOnANodeThatIsNoReceiver()
