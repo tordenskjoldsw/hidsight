@@ -1,0 +1,37 @@
+# AI agent instruction and planning files (maintainer's working documents)
+CLAUDE.md
+CLAUDE.local.md
+AGENT.md
+AGENTS.md
+GEMINI.md
+COPILOT.md
+.claude/
+.cursor/
+.cursorrules
+.windsurfrules
+.aider*
+IMPLEMENTATION.md
+NOTES.md
+
+# Build output
+/build/
+/build-*/
+CMakeLists.txt.user*
+compile_commands.json
+.cache/
+
+# Written by ECM's KDEClangFormat at configure time
+/.clang-format
+
+# Packaging output
+/packaging/src/
+/packaging/pkg/
+/packaging/*.pkg.tar.*
+
+# Python spikes
+__pycache__/
+
+# Editors
+.vscode/
+.idea/
+*.swp
