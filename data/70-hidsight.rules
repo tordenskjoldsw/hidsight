@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2026 Tobias Kaminski
+# SPDX-License-Identifier: MIT
+#
+# Logitech receivers and devices that speak HID++: let the logged-in
+# user read and write their hidraw nodes. The build installs it under
+# /usr/lib/udev/rules.d; the number keeps it before 73-seat-late.rules,
+# which applies the uaccess tag.
+
+# Receivers and devices on USB (Bolt, Unifying, Lightspeed, Nano, cable)
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="046d", TAG+="uaccess"
+
+# Devices connected over Bluetooth (bus 0005, vendor 046d)
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", KERNELS=="0005:046D:*", TAG+="uaccess"

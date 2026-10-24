@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: 2026 Tobias Kaminski
+# SPDX-License-Identifier: CC0-1.0
+[Desktop Entry]
+Type=Application
+Name=Hidsight
+GenericName=Keyboard and Mouse Status
+Comment=Battery and state of Logitech keyboards and mice
+Exec=hidsight
+Icon=de.tordenskjold.hidsight
+Terminal=false
+Categories=Qt;KDE;System;Monitor;
+Keywords=battery;keyboard;mouse;receiver;bolt;unifying;hid++;

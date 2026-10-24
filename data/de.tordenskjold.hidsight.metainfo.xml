@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+SPDX-FileCopyrightText: 2026 Tobias Kaminski
+SPDX-License-Identifier: CC0-1.0
+-->
+<component type="desktop-application">
+  <id>de.tordenskjold.hidsight</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Hidsight</name>
+  <summary>Battery and state of Logitech keyboards and mice</summary>
+  <developer id="de.tordenskjold">
+    <name>Tobias Kaminski</name>
+  </developer>
+  <description>
+    <p>
+      Hidsight shows the Logitech keyboards and mice connected to a receiver
+      or over Bluetooth: battery and charging state, firmware, DPI and report
+      rate, with a tray icon for the battery.
+    </p>
+    <p>
+      It only reads and changes no setting on any device. It runs as the
+      logged-in user, without a daemon and without root.
+    </p>
+  </description>
+  <launchable type="desktop-id">de.tordenskjold.hidsight.desktop</launchable>
+  <url type="homepage">https://github.com/tordenskjoldsw/hidsight</url>
+  <url type="bugtracker">https://github.com/tordenskjoldsw/hidsight/issues</url>
+  <url type="vcs-browser">https://github.com/tordenskjoldsw/hidsight</url>
+  <categories>
+    <category>System</category>
+    <category>Monitor</category>
+  </categories>
+  <provides>
+    <binary>hidsight</binary>
+  </provides>
+  <supports>
+    <control>keyboard</control>
+    <control>pointing</control>
+  </supports>
+  <content_rating type="oars-1.1"/>
+</component>
