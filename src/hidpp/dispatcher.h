@@ -34,6 +34,13 @@ public:
 
     void setTimeout(std::chrono::milliseconds timeout);
 
+    // 1 to 15; 0 marks events.
+    void setSoftwareId(std::uint8_t softwareId);
+    std::uint8_t softwareId() const
+    {
+        return m_softwareId;
+    }
+
     // Queues a request. done runs later from the event loop with the reply or
     // an error, never from inside this call. Callbacks still pending when the
     // dispatcher is destroyed are dropped without running; callers that
@@ -64,6 +71,7 @@ private:
     std::deque<Pending> m_queue;
     std::optional<Pending> m_inFlight;
     QTimer m_timer;
+    std::uint8_t m_softwareId = DefaultSoftwareId;
     bool m_nextScheduled = false;
     bool m_disconnected = false;
 };

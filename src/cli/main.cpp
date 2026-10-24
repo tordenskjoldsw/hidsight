@@ -29,6 +29,10 @@ namespace
 // Far larger than a capture of six devices; bounds what is read into memory.
 constexpr qint64 MaxCaptureSize = 1024 * 1024;
 
+// Differs from the app's, so the CLI and the app can read the same receiver
+// at the same time.
+constexpr std::uint8_t CliSoftwareId = 0x0B;
+
 // Replayed replies arrive at once, so a request the capture left unanswered
 // need not wait the full timeout.
 constexpr std::chrono::milliseconds ReplayTimeout = 50ms;
@@ -115,6 +119,7 @@ int main(int argc, char *argv[])
     }
     std::unique_ptr<hidpp::Channel> channel = std::move(opened).value();
     auto *replayChannel = qobject_cast<hidpp::ReplayChannel *>(channel.get());
+    const std::uint8_t softwareId = replayChannel ? replayChannel->softwareId() : CliSoftwareId;
 
     QFile recording;
     if (parser.isSet(recordOption)) {
@@ -130,6 +135,7 @@ int main(int argc, char *argv[])
     }
 
     hidpp::Dispatcher dispatcher(channel.get());
+    dispatcher.setSoftwareId(softwareId);
     if (replay) {
         dispatcher.setTimeout(ReplayTimeout);
     }

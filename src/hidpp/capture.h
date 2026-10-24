@@ -34,6 +34,9 @@ struct CaptureEntry {
 // Fails with ErrorKind::Malformed and the line number as code.
 Result<std::vector<CaptureEntry>> parseCapture(QByteArrayView text);
 QByteArray formatCaptureLine(const CaptureEntry &entry);
+// The software id of the HID++ 2.0 requests in a capture, for a dispatcher
+// that replays it; the default when the capture has none.
+std::uint8_t captureSoftwareId(const std::vector<CaptureEntry> &entries);
 
 // Replaces the identifiers of a device in replies by zeros: the unit id in
 // the DeviceFwVersion entity count and four bytes of unknown meaning in each
@@ -90,6 +93,8 @@ public:
     bool isAtEnd() const;
     // The first request that differed from the capture.
     std::optional<Report> mismatch() const;
+    // The software id the capture was recorded with.
+    std::uint8_t softwareId() const;
 
 private:
     std::vector<Report> takeReceived();

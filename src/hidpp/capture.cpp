@@ -148,6 +148,16 @@ Report IdentifierRedactor::redact(const Report &report)
     return report;
 }
 
+std::uint8_t captureSoftwareId(const std::vector<CaptureEntry> &entries)
+{
+    for (const CaptureEntry &entry : entries) {
+        if (entry.direction == CaptureEntry::Direction::Sent && entry.report.deviceIndex() != ReceiverIndex) {
+            return entry.report.address() & 0x0F;
+        }
+    }
+    return DefaultSoftwareId;
+}
+
 RecordingChannel::RecordingChannel(std::unique_ptr<Channel> inner, QIODevice *output, QObject *parent)
     : Channel(parent)
     , m_inner(std::move(inner))
@@ -217,6 +227,11 @@ void ReplayChannel::drain()
 bool ReplayChannel::isAtEnd() const
 {
     return m_position == m_entries.size();
+}
+
+std::uint8_t ReplayChannel::softwareId() const
+{
+    return captureSoftwareId(m_entries);
 }
 
 std::optional<Report> ReplayChannel::mismatch() const

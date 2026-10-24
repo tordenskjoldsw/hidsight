@@ -100,7 +100,7 @@ Device::Device(Dispatcher &dispatcher, std::uint8_t index)
 
 void Device::call(std::uint8_t featureIndex, std::uint8_t function, std::array<std::uint8_t, 3> params, Callback<Report> done) const
 {
-    m_dispatcher->request(Report::shortRequest(m_index, featureIndex, functionByte(function), params), std::move(done));
+    m_dispatcher->request(Report::shortRequest(m_index, featureIndex, functionByte(function, m_dispatcher->softwareId()), params), std::move(done));
 }
 
 void Device::ping(Callback<ProtocolVersion> done) const

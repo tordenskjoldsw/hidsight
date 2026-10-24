@@ -32,6 +32,12 @@ void Dispatcher::setTimeout(std::chrono::milliseconds timeout)
     m_timer.setInterval(timeout);
 }
 
+void Dispatcher::setSoftwareId(std::uint8_t softwareId)
+{
+    Q_ASSERT(softwareId >= 1 && softwareId <= 0x0F);
+    m_softwareId = softwareId;
+}
+
 void Dispatcher::request(const Report &request, Callback<Report> done)
 {
     if (m_disconnected) {

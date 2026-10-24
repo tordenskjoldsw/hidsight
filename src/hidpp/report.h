@@ -24,8 +24,10 @@ inline constexpr std::size_t HeaderSize = 4;
 inline constexpr std::uint8_t ReceiverIndex = 0xFF;
 
 // Marks Hidsight's HID++ 2.0 requests, so replies to other tools on the same
-// node (Solaar, logiops) are not taken for ours.
-inline constexpr std::uint8_t SoftwareId = 0x0A;
+// node (Solaar, logiops) are not taken for ours. Two processes that use the
+// same id take each other's replies (seen on the desk with the app and the
+// CLI on one node), so each sets its own on the dispatcher.
+inline constexpr std::uint8_t DefaultSoftwareId = 0x0A;
 
 // Byte 2 of an error reply: HID++ 1.0 sub id and HID++ 2.0 feature index.
 inline constexpr std::uint8_t Error10SubId = 0x8F;
@@ -33,9 +35,9 @@ inline constexpr std::uint8_t Error20FeatureIndex = 0xFF;
 
 // Byte 3 of a HID++ 2.0 request: the function in the high nibble, the
 // software id in the low one.
-constexpr std::uint8_t functionByte(std::uint8_t function)
+constexpr std::uint8_t functionByte(std::uint8_t function, std::uint8_t softwareId = DefaultSoftwareId)
 {
-    return static_cast<std::uint8_t>((function << 4) | SoftwareId);
+    return static_cast<std::uint8_t>((function << 4) | (softwareId & 0x0F));
 }
 
 // One HID++ report: report id, device index, two header bytes, parameters.
