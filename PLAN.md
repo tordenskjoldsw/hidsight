@@ -321,7 +321,7 @@ reporting upstream; German translation.
   is a safety net. Start with 15 minutes. Verified on the desk: a read
   of a sleeping device gets 0x04 at once and does not wake it. A device
   that falls asleep stays "online" in the list until the next re-read
-  finds it; how to show "asleep or off" is part of Phase 3.
+  finds it.
 - **Autostart mechanism.** XDG autostart desktop file written by the
   app, or a KConfig-managed entry. Decide in Phase 4.
 - **Icon.** A symbolic tray icon set for the battery levels and an app
@@ -329,6 +329,15 @@ reporting upstream; German translation.
 
 Decided:
 
+- 2026-10-24: a device that does not answer is shown neutrally as "not
+  connected, asleep or switched off", greyed, with its last known
+  battery and how long ago it was read. The receiver answers the same
+  for both, and neither sends an event (section 6), so Hidsight does not
+  claim which one it is.
+- 2026-10-24: the name and kind of each device are remembered per
+  receiver model and slot in the KConfig state file, so a device that is
+  asleep when Hidsight starts is listed by name. Nothing else is stored;
+  no unit ids or serial numbers.
 - 2026-10-24: C++ only, no Rust core. The KDE pieces (tray,
   notifications, config) have complete bindings only in C++; the
   protocol layer is a few hundred lines; a second build system buys
