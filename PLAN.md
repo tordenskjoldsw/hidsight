@@ -2,9 +2,10 @@
 
 Status: 2026-10-24 - name decided (Hidsight), stack decided (section
 12), devices on the maintainer's desk read by the Python spike
-(section 6). Phases 0 to 3 done. Phase 4 in the working tree: tray
-item, notifications, settings and autostart run on the desk; CI has not
-run it yet.
+(section 6). Phases 0 to 4 done: window, tray item, notifications,
+settings and autostart run on the desk from the installed package;
+tests pass under ASan and UBSan, CI is green. Phase 5 (release) is
+next.
 
 Hidsight is the maintainer's first desktop project after three Sailfish
 OS apps (SailVault, SailToken, SailTune) and the PineTime firmware
