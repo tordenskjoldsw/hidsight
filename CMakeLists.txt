@@ -63,6 +63,12 @@ if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
 
+# Translations arrive as po/<language>/hidsight.po; Messages.sh extracts
+# the template.
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/po)
+    ki18n_install(po)
+endif()
+
 ecm_qt_install_logging_categories(
     EXPORT HIDSIGHT
     FILE hidsight.categories
