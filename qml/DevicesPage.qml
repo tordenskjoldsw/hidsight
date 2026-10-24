@@ -20,21 +20,6 @@ Kirigami.ScrollablePage {
         });
     }
 
-    actions: [
-        Kirigami.Action {
-            icon.name: "view-refresh"
-            text: i18nc("@action:button", "Refresh")
-            shortcut: StandardKey.Refresh
-            onTriggered: DeviceManager.refresh()
-        },
-        Kirigami.Action {
-            icon.name: "help-about"
-            text: i18nc("@action:button", "About Hidsight")
-            displayHint: Kirigami.DisplayHint.AlwaysHide
-            onTriggered: page.Kirigami.PageStack.pageStack.layers.push(Qt.createComponent("org.kde.kirigamiaddons.formcard", "AboutPage"))
-        }
-    ]
-
     header: Kirigami.InlineMessage {
         visible: DeviceManager.accessDenied && list.count > 0
         position: Kirigami.InlineMessage.Position.Header

@@ -3,6 +3,7 @@
 
 import QtQuick
 import org.kde.kirigami as Kirigami
+import de.tordenskjold.hidsight
 
 Kirigami.ApplicationWindow {
     id: root
@@ -17,8 +18,31 @@ Kirigami.ApplicationWindow {
     pageStack.initialPage: DevicesPage {}
     pageStack.globalToolBar.style: Kirigami.ApplicationHeaderStyle.ToolBar
 
-    Shortcut {
-        sequences: [StandardKey.Quit]
-        onActivated: Qt.quit()
+    // The app-wide actions, the same on every page, also when a narrow window
+    // shows only a device.
+    globalDrawer: Kirigami.GlobalDrawer {
+        isMenu: true
+        actions: [
+            Kirigami.Action {
+                icon.name: "view-refresh"
+                text: i18nc("@action:inmenu", "Refresh")
+                shortcut: StandardKey.Refresh
+                onTriggered: DeviceManager.refresh()
+            },
+            Kirigami.Action {
+                separator: true
+            },
+            Kirigami.Action {
+                icon.name: "help-about"
+                text: i18nc("@action:inmenu", "About Hidsight")
+                onTriggered: root.pageStack.layers.push(Qt.createComponent("org.kde.kirigamiaddons.formcard", "AboutPage"))
+            },
+            Kirigami.Action {
+                icon.name: "application-exit"
+                text: i18nc("@action:inmenu", "Quit")
+                shortcut: StandardKey.Quit
+                onTriggered: Qt.quit()
+            }
+        ]
     }
 }
