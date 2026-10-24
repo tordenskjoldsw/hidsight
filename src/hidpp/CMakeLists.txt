@@ -3,6 +3,7 @@
 
 add_library(hidsight_hidpp STATIC
     battery.cpp battery.h
+    capture.cpp capture.h
     channel.h
     device.cpp device.h
     devicefwversion.cpp devicefwversion.h
