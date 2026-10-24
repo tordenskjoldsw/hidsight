@@ -11,11 +11,10 @@ to change settings. Plasma's own battery widget cannot see devices on a
 Logi Bolt receiver while the kernel driver does not know that receiver.
 Hidsight is the small, read-only, Plasma-native view of these devices.
 
-**Status:** Phase 0 of the [plan](PLAN.md). The build, packaging and CI
-are in place and an empty Kirigami window starts; nothing talks to a
-device yet. The protocol was explored with a throwaway Python spike in
-[spikes/](spikes/) against an MX Keys S and an MX Master 3S on a Logi
-Bolt Receiver.
+**Status:** Phase 1 of the [plan](PLAN.md). The protocol library and
+`hidsight-cli` read an MX Keys S and an MX Master 3S on a Logi Bolt
+Receiver: name, firmware, battery and DPI. The window is still empty;
+it shows devices from Phase 3 on.
 
 ## What Hidsight does not do
 
@@ -60,6 +59,24 @@ ctest --preset debug
 The `asan` preset builds with AddressSanitizer and UndefinedBehaviorSanitizer,
 `release` builds optimized. `cmake --build --preset debug --target
 clang-format` formats the sources in the KDE Frameworks style.
+
+## Command line
+
+`hidsight-cli` lists the devices on a receiver as text or JSON. It needs
+the HID++ node of the receiver, the hidraw node whose report descriptor
+uses usage page 0xFF00; finding it automatically comes with Phase 2.
+
+```sh
+hidsight-cli /dev/hidraw3
+hidsight-cli --json /dev/hidraw3
+```
+
+`--record <file>` writes every report sent and received to a capture
+file, and `--replay <file>` reads a capture instead of a node. The tests
+replay captures recorded this way. A capture holds the raw reports of
+your devices; look at it before you share it.
+
+## Packaging
 
 To build an Arch package from the checkout:
 
