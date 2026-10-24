@@ -84,6 +84,34 @@ ChargingState batteryStatusCharging(std::uint8_t raw)
 
 } // namespace
 
+Battery toBattery(const UnifiedBattery &status)
+{
+    Battery battery;
+    battery.source = Battery::Source::UnifiedBattery;
+    battery.percentage = status.percentage;
+    battery.level = status.level;
+    battery.charging = status.charging;
+    battery.externalPower = status.externalPower;
+    return battery;
+}
+
+Battery toBattery(const BatteryStatus &status)
+{
+    Battery battery;
+    battery.source = Battery::Source::BatteryStatus;
+    battery.percentage = status.percentage;
+    battery.charging = status.charging;
+    return battery;
+}
+
+Battery toBattery(const BatteryVoltage &voltage)
+{
+    Battery battery;
+    battery.source = Battery::Source::BatteryVoltage;
+    battery.millivolts = voltage.millivolts;
+    return battery;
+}
+
 void UnifiedBattery::read(const Device &device, std::uint8_t featureIndex, Callback<UnifiedBattery> done)
 {
     device.request<bool>(featureIndex, GetCapabilities, {}, &UnifiedBattery::parseCapabilities, [device, featureIndex, done](Result<bool> hasPercentage) {

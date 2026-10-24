@@ -3,6 +3,7 @@
 
 #include "listing.h"
 
+#include "hidpp/keys.h"
 #include "hidpp/receiver.h"
 
 #include <KLocalizedString>
@@ -86,55 +87,6 @@ QString kindText(DeviceKind kind)
     return i18nc("@info device kind", "unknown kind");
 }
 
-QString kindKey(DeviceKind kind)
-{
-    switch (kind) {
-    case DeviceKind::Keyboard:
-        return u"keyboard"_s;
-    case DeviceKind::RemoteControl:
-        return u"remoteControl"_s;
-    case DeviceKind::Numpad:
-        return u"numpad"_s;
-    case DeviceKind::Mouse:
-        return u"mouse"_s;
-    case DeviceKind::Trackpad:
-        return u"trackpad"_s;
-    case DeviceKind::Trackball:
-        return u"trackball"_s;
-    case DeviceKind::Presenter:
-        return u"presenter"_s;
-    case DeviceKind::Receiver:
-        return u"receiver"_s;
-    case DeviceKind::Headset:
-        return u"headset"_s;
-    case DeviceKind::Webcam:
-        return u"webcam"_s;
-    case DeviceKind::SteeringWheel:
-        return u"steeringWheel"_s;
-    case DeviceKind::Joystick:
-        return u"joystick"_s;
-    case DeviceKind::Gamepad:
-        return u"gamepad"_s;
-    case DeviceKind::Dock:
-        return u"dock"_s;
-    case DeviceKind::Speaker:
-        return u"speaker"_s;
-    case DeviceKind::Microphone:
-        return u"microphone"_s;
-    case DeviceKind::IlluminationLight:
-        return u"illuminationLight"_s;
-    case DeviceKind::ProgrammableController:
-        return u"programmableController"_s;
-    case DeviceKind::CarSimPedals:
-        return u"carSimPedals"_s;
-    case DeviceKind::Adapter:
-        return u"adapter"_s;
-    case DeviceKind::Unknown:
-        break;
-    }
-    return u"unknown"_s;
-}
-
 QString firmwareTypeText(FirmwareType type)
 {
     switch (type) {
@@ -158,29 +110,6 @@ QString firmwareTypeText(FirmwareType type)
     return i18nc("@info firmware type", "other");
 }
 
-QString firmwareTypeKey(FirmwareType type)
-{
-    switch (type) {
-    case FirmwareType::MainApplication:
-        return u"mainApplication"_s;
-    case FirmwareType::Bootloader:
-        return u"bootloader"_s;
-    case FirmwareType::Hardware:
-        return u"hardware"_s;
-    case FirmwareType::Touchpad:
-        return u"touchpad"_s;
-    case FirmwareType::OpticalSensor:
-        return u"opticalSensor"_s;
-    case FirmwareType::Softdevice:
-        return u"softdevice"_s;
-    case FirmwareType::RfCompanion:
-        return u"rfCompanion"_s;
-    case FirmwareType::Other:
-        break;
-    }
-    return u"other"_s;
-}
-
 QString levelText(BatteryLevel level)
 {
     switch (level) {
@@ -196,23 +125,6 @@ QString levelText(BatteryLevel level)
         break;
     }
     return {};
-}
-
-QString levelKey(BatteryLevel level)
-{
-    switch (level) {
-    case BatteryLevel::Critical:
-        return u"critical"_s;
-    case BatteryLevel::Low:
-        return u"low"_s;
-    case BatteryLevel::Good:
-        return u"good"_s;
-    case BatteryLevel::Full:
-        return u"full"_s;
-    case BatteryLevel::Unknown:
-        break;
-    }
-    return u"unknown"_s;
 }
 
 QString chargingText(ChargingState state)
@@ -234,64 +146,9 @@ QString chargingText(ChargingState state)
     return {};
 }
 
-QString chargingKey(ChargingState state)
-{
-    switch (state) {
-    case ChargingState::Discharging:
-        return u"discharging"_s;
-    case ChargingState::Charging:
-        return u"charging"_s;
-    case ChargingState::ChargingSlowly:
-        return u"chargingSlowly"_s;
-    case ChargingState::Complete:
-        return u"complete"_s;
-    case ChargingState::Error:
-        return u"error"_s;
-    case ChargingState::Unknown:
-        break;
-    }
-    return u"unknown"_s;
-}
-
-QString batterySourceKey(Battery::Source source)
-{
-    switch (source) {
-    case Battery::Source::UnifiedBattery:
-        return u"unifiedBattery"_s;
-    case Battery::Source::BatteryStatus:
-        return u"batteryStatus"_s;
-    case Battery::Source::BatteryVoltage:
-        return u"batteryVoltage"_s;
-    }
-    return {};
-}
-
-QString errorKey(ErrorKind kind)
-{
-    switch (kind) {
-    case ErrorKind::Transport:
-        return u"transport"_s;
-    case ErrorKind::PermissionDenied:
-        return u"permissionDenied"_s;
-    case ErrorKind::NotFound:
-        return u"notFound"_s;
-    case ErrorKind::Disconnected:
-        return u"disconnected"_s;
-    case ErrorKind::Timeout:
-        return u"timeout"_s;
-    case ErrorKind::Protocol10:
-        return u"hidpp10"_s;
-    case ErrorKind::Protocol20:
-        return u"hidpp20"_s;
-    case ErrorKind::Malformed:
-        return u"malformed"_s;
-    }
-    return {};
-}
-
 QJsonObject errorJson(const Error &error)
 {
-    return QJsonObject{{u"error"_s, QJsonObject{{u"kind"_s, errorKey(error.kind)}, {u"code"_s, error.code}}}};
+    return QJsonObject{{u"error"_s, QJsonObject{{u"kind"_s, key(error.kind)}, {u"code"_s, error.code}}}};
 }
 
 QString hex4(std::uint16_t value)
@@ -380,7 +237,7 @@ QJsonObject deviceJson(std::uint8_t index, const DeviceInfo &info)
     if (info.name) {
         if (info.name->hasValue()) {
             device.insert(u"name"_s, info.name->value().name);
-            device.insert(u"kind"_s, kindKey(info.name->value().kind));
+            device.insert(u"kind"_s, key(info.name->value().kind));
         } else {
             device.insert(u"name"_s, errorJson(info.name->error()));
         }
@@ -389,7 +246,7 @@ QJsonObject deviceJson(std::uint8_t index, const DeviceInfo &info)
         if (info.firmware->hasValue()) {
             QJsonArray firmware;
             for (const FirmwareEntry &entry : info.firmware->value().entries) {
-                firmware.append(QJsonObject{{u"type"_s, firmwareTypeKey(entry.type)}, {u"version"_s, entry.version()}});
+                firmware.append(QJsonObject{{u"type"_s, key(entry.type)}, {u"version"_s, entry.version()}});
             }
             device.insert(u"firmware"_s, firmware);
         } else {
@@ -400,9 +257,9 @@ QJsonObject deviceJson(std::uint8_t index, const DeviceInfo &info)
         if (info.battery->hasValue()) {
             const Battery &battery = info.battery->value();
             QJsonObject object{
-                {u"source"_s, batterySourceKey(battery.source)},
-                {u"level"_s, levelKey(battery.level)},
-                {u"charging"_s, chargingKey(battery.charging)},
+                {u"source"_s, key(battery.source)},
+                {u"level"_s, key(battery.level)},
+                {u"charging"_s, key(battery.charging)},
             };
             if (battery.percentage) {
                 object.insert(u"percentage"_s, *battery.percentage);

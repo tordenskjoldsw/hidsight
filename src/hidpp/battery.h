@@ -67,4 +67,25 @@ struct BatteryVoltage {
     static Result<BatteryVoltage> parse(std::span<const std::uint8_t> params);
 };
 
+// The battery from whichever battery feature the device has, Unified Battery
+// first.
+struct Battery {
+    enum class Source : std::uint8_t {
+        UnifiedBattery,
+        BatteryStatus,
+        BatteryVoltage,
+    };
+
+    Source source = Source::UnifiedBattery;
+    std::optional<std::uint8_t> percentage;
+    std::optional<std::uint16_t> millivolts;
+    BatteryLevel level = BatteryLevel::Unknown;
+    ChargingState charging = ChargingState::Unknown;
+    std::optional<bool> externalPower;
+};
+
+Battery toBattery(const UnifiedBattery &status);
+Battery toBattery(const BatteryStatus &status);
+Battery toBattery(const BatteryVoltage &voltage);
+
 } // namespace hidpp

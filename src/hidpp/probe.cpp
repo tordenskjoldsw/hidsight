@@ -11,34 +11,6 @@ namespace hidpp
 namespace
 {
 
-Battery toBattery(const UnifiedBattery &status)
-{
-    Battery battery;
-    battery.source = Battery::Source::UnifiedBattery;
-    battery.percentage = status.percentage;
-    battery.level = status.level;
-    battery.charging = status.charging;
-    battery.externalPower = status.externalPower;
-    return battery;
-}
-
-Battery toBattery(const BatteryStatus &status)
-{
-    Battery battery;
-    battery.source = Battery::Source::BatteryStatus;
-    battery.percentage = status.percentage;
-    battery.charging = status.charging;
-    return battery;
-}
-
-Battery toBattery(const BatteryVoltage &voltage)
-{
-    Battery battery;
-    battery.source = Battery::Source::BatteryVoltage;
-    battery.millivolts = voltage.millivolts;
-    return battery;
-}
-
 class Probe : public std::enable_shared_from_this<Probe>
 {
 public:

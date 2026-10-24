@@ -10,6 +10,7 @@ add_library(hidsight_hidpp STATIC
     devicename.cpp devicename.h
     dispatcher.cpp dispatcher.h
     hidrawchannel.cpp hidrawchannel.h
+    keys.cpp keys.h
     pointer.cpp pointer.h
     probe.cpp probe.h
     receiver.cpp receiver.h
