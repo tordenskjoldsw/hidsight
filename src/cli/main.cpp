@@ -22,6 +22,7 @@
 #include <QTimer>
 
 #include <memory>
+#include <optional>
 
 using namespace Qt::StringLiterals;
 using namespace std::chrono_literals;
@@ -72,10 +73,13 @@ hidpp::Result<std::unique_ptr<hidpp::Channel>> openNode(const QString &path)
     return std::unique_ptr<hidpp::Channel>(std::move(channel).value());
 }
 
-int watch(std::unique_ptr<hidpp::Channel> channel, std::uint8_t softwareId, hidpp::ReplayChannel *replayChannel)
+int watch(std::unique_ptr<hidpp::Channel> channel, std::uint8_t softwareId, hidpp::ReplayChannel *replayChannel, std::optional<std::chrono::seconds> interval)
 {
     hidpp::ReceiverSession session(std::move(channel));
     session.setSoftwareId(softwareId);
+    if (interval) {
+        session.setRereadInterval(*interval);
+    }
     if (replayChannel) {
         session.setTimeout(ReplayTimeout);
         // A capture has no end of its own; stop once the session has had time
@@ -129,7 +133,10 @@ int main(int argc, char *argv[])
                                           i18n("Read the reports from a capture <file> instead of a node."),
                                           i18nc("@info command line value", "file"));
     const QCommandLineOption watchOption(u"watch"_s, i18n("Keep reading the receiver and print every change of a device until interrupted."));
-    parser.addOptions({jsonOption, recordOption, replayOption, watchOption});
+    const QCommandLineOption intervalOption(u"interval"_s,
+                                            i18n("With --watch, read every device again every <seconds> instead of every 15 minutes."),
+                                            i18nc("@info command line value", "seconds"));
+    parser.addOptions({jsonOption, recordOption, replayOption, watchOption, intervalOption});
     parser.process(app);
     about.processCommandLine(&parser);
 
@@ -140,6 +147,17 @@ int main(int argc, char *argv[])
         return 1;
     }
     const QString source = replay ? parser.value(replayOption) : positional.first();
+
+    std::optional<std::chrono::seconds> interval;
+    if (parser.isSet(intervalOption)) {
+        bool ok = false;
+        const int seconds = parser.value(intervalOption).toInt(&ok);
+        if (!ok || seconds < 1) {
+            err() << i18n("The interval is a number of seconds, at least 1.") << Qt::endl;
+            return 1;
+        }
+        interval = std::chrono::seconds(seconds);
+    }
 
     auto opened = replay ? openReplay(source) : openNode(source);
     if (!opened) {
@@ -169,7 +187,7 @@ int main(int argc, char *argv[])
     }
 
     if (parser.isSet(watchOption)) {
-        return watch(std::move(channel), softwareId, replayChannel);
+        return watch(std::move(channel), softwareId, replayChannel, interval);
     }
 
     hidpp::Dispatcher dispatcher(channel.get());
