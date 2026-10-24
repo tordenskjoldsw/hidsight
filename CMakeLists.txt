@@ -20,6 +20,7 @@ include(KDEClangFormat)
 include(ECMSetupVersion)
 include(ECMEnableSanitizers)
 include(ECMQtDeclareLoggingCategory)
+include(ECMAddTests)
 include(FeatureSummary)
 
 ecm_setup_version(${PROJECT_VERSION}
@@ -51,6 +52,10 @@ add_subdirectory(src/hidpp)
 add_subdirectory(src/cli)
 add_subdirectory(src/app)
 add_subdirectory(data)
+if(BUILD_TESTING)
+    find_package(Qt6 ${QT_MIN_VERSION} REQUIRED COMPONENTS Test)
+    add_subdirectory(tests)
+endif()
 
 ecm_qt_install_logging_categories(
     EXPORT HIDSIGHT
