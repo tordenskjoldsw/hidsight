@@ -11,10 +11,12 @@ to change settings. Plasma's own battery widget cannot see devices on a
 Logi Bolt receiver while the kernel driver does not know that receiver.
 Hidsight is the small, read-only, Plasma-native view of these devices.
 
-**Status:** Phase 1 of the [plan](PLAN.md). The protocol library and
-`hidsight-cli` read an MX Keys S and an MX Master 3S on a Logi Bolt
-Receiver: name, firmware, battery and DPI. The window is still empty;
-it shows devices from Phase 3 on.
+**Status:** Phase 2 of the [plan](PLAN.md). Hidsight finds Logitech
+receivers as they are plugged in, reads an MX Keys S and an MX Master 3S
+on a Logi Bolt Receiver (name, firmware, battery, DPI) and follows
+battery changes and devices waking up. `hidsight-cli` shows all of it on
+the command line; the window is still empty and shows the devices from
+Phase 3 on.
 
 ## What Hidsight does not do
 
@@ -64,7 +66,7 @@ clang-format` formats the sources in the KDE Frameworks style.
 
 `hidsight-cli` lists the devices on a receiver as text or JSON. It needs
 the HID++ node of the receiver, the hidraw node whose report descriptor
-uses usage page 0xFF00; finding it automatically comes with Phase 2.
+uses usage page 0xFF00. The app finds that node by itself.
 
 ```sh
 hidsight-cli /dev/hidraw3
