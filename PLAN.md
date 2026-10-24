@@ -330,11 +330,16 @@ reporting upstream; German translation.
   finds it.
 - **Autostart mechanism.** XDG autostart desktop file written by the
   app, or a KConfig-managed entry. Decide in Phase 4.
-- **Icon.** A symbolic tray icon set for the battery levels and an app
-  icon; design in Phase 3.
+- **Tray icons.** A symbolic icon set for the battery levels in the
+  tray; design in Phase 4.
 
 Decided:
 
+- 2026-10-24: the app icon is a mouse in front of a blue ring that is
+  open like a gauge, in Breeze colours: the state of a device at a
+  glance, and not tied to the battery, since a later release may also
+  change settings (Phase 6). Chosen from six drafts rendered at 128, 48
+  and 22 px on light and dark backgrounds.
 - 2026-10-24: a device that does not answer is shown neutrally as "not
   connected, asleep or switched off", greyed, with its last known
   battery and how long ago it was read. The receiver answers the same
