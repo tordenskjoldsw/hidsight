@@ -2,8 +2,9 @@
 
 Status: 2026-10-24 - name decided (Hidsight), stack decided (section
 12), devices on the maintainer's desk read by the Python spike
-(section 6). Phase 0 done: builds, tests and packages on the desk, the
-empty window starts, CI is green. Phase 1 is next.
+(section 6). Phase 0 done. Phase 1 in the working tree: protocol
+library and `hidsight-cli` read both devices on the desk as the spike
+did; tests pass under ASan and UBSan; CI has not run it yet.
 
 Hidsight is the maintainer's first desktop project after three Sailfish
 OS apps (SailVault, SailToken, SailTune) and the PineTime firmware
@@ -165,6 +166,17 @@ Both devices speak HID++ 4.5. Indices 3 to 6 answer HID++ 1.0 error
   both devices.
 - Feature flags: 0x80 obsolete, 0x40 hidden, 0x20 engineering. Hidden
   and engineering features never reach the UI.
+- A full read of both devices by `hidsight-cli` (ping, feature table,
+  name, firmware, battery, DPI; 100 requests) took 3.3 s with both
+  devices awake and no retry, about 33 ms per request. Reading the
+  feature table first does not fit criterion 5; Phase 2 reads the
+  battery before the rest or keeps the feature table.
+- Unplugging the charging cable of the MX Keys S between two reads by
+  `hidsight-cli`: the second read showed 100 %, discharging, no external
+  power (Unified Battery status bytes 2 and 3).
+- The raw capture of that read is
+  `tests/captures/bolt-mxkeys-s-mxmaster-3s-2026-10-24.capture`; the
+  spike's capture is decoded text and stays a reference.
 
 ## 7. Device access
 
