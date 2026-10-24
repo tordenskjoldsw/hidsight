@@ -1,0 +1,54 @@
+# SPDX-FileCopyrightText: 2026 Tobias Kaminski
+# SPDX-License-Identifier: MIT
+#
+# Builds the checkout this file lives in. The AUR package (Phase 5) will
+# build from a release tag instead.
+
+# Maintainer: Tobias Kaminski
+
+pkgname=hidsight
+pkgver=0.0.0
+pkgrel=1
+pkgdesc='Battery and state of Logitech keyboards and mice, native on Plasma'
+arch=(x86_64 aarch64)
+url='https://github.com/tordenskjoldsw/hidsight'
+license=(MIT)
+depends=(
+  gcc-libs
+  glibc
+  hicolor-icon-theme
+  kcoreaddons
+  ki18n
+  kirigami
+  qqc2-desktop-style
+  qt6-base
+  qt6-declarative
+)
+makedepends=(
+  cmake
+  extra-cmake-modules
+  ninja
+)
+checkdepends=(
+  appstream
+  desktop-file-utils
+)
+
+_srcroot="$(realpath "$startdir/..")"
+
+build() {
+  cmake -B build -S "$_srcroot" -G Ninja \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_BUILD_TYPE=None \
+    -DBUILD_TESTING=ON
+  cmake --build build
+}
+
+check() {
+  ctest --test-dir build --output-on-failure
+}
+
+package() {
+  DESTDIR="$pkgdir" cmake --install build
+  install -Dm644 "$_srcroot/LICENSES/MIT.txt" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

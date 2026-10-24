@@ -1,0 +1,70 @@
+# SPDX-FileCopyrightText: 2026 Tobias Kaminski
+# SPDX-License-Identifier: MIT
+
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  BUILD_DEPS: >-
+    base-devel git cmake extra-cmake-modules ninja clang
+    qt6-base qt6-declarative kirigami ki18n kcoreaddons qqc2-desktop-style
+    appstream desktop-file-utils
+
+jobs:
+  build:
+    name: Build and test (${{ matrix.preset }})
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [debug, asan]
+    steps:
+      - name: Install dependencies
+        run: pacman -Syu --noconfirm --needed $BUILD_DEPS
+      - uses: actions/checkout@v5
+      - name: Configure
+        run: cmake --preset ${{ matrix.preset }}
+      - name: Build
+        run: cmake --build --preset ${{ matrix.preset }}
+      - name: Test
+        run: ctest --preset ${{ matrix.preset }}
+      - name: Check formatting
+        if: matrix.preset == 'debug'
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          cmake --build --preset debug --target clang-format
+          git diff --exit-code
+
+  package:
+    name: PKGBUILD
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Install dependencies
+        run: pacman -Syu --noconfirm --needed $BUILD_DEPS
+      - uses: actions/checkout@v5
+      - name: Build the package as an unprivileged user
+        run: |
+          useradd --create-home builder
+          chown -R builder "$GITHUB_WORKSPACE"
+          su builder -c "cd '$GITHUB_WORKSPACE/packaging' && makepkg --noconfirm"
+
+  reuse:
+    name: REUSE
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Install reuse
+        run: pacman -Syu --noconfirm --needed git reuse
+      - uses: actions/checkout@v5
+      - name: Lint licensing
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          reuse lint
