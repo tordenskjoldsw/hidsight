@@ -1,0 +1,92 @@
+/dev/hidraw3
+  receiver connection state: 10ff8102000200 -> 2 devices connected
+  receiver pairing info 0x51: 0178b3000000000100801401000000
+  receiver pairing info 0x52: 0234b000000000010a801401000000
+  device 1: HID++ 4.5
+    features (33):
+      0x0001 IFeatureSet                  idx  1 
+      0x0003 DeviceFwVersion              idx  2 
+      0x0005 DeviceName                   idx  3 
+      0x1d4b WirelessDeviceStatus         idx  4 
+      0x0020 ConfigChange                 idx  5 
+      0x0007 DeviceFriendlyName           idx  6 
+      0x0011 ?                            idx  7 
+      0x1004 UnifiedBattery               idx  8 
+      0x1b04 ReprogControlsV4             idx  9 
+      0x1814 ChangeHost                   idx 10 
+      0x1815 HostsInfo                    idx 11 
+      0x1982 Backlight2                   idx 12 
+      0x40a3 FnInversion                  idx 13 
+      0x4220 LockKeyState                 idx 14 
+      0x4521 DisableKeys                  idx 15 
+      0x4531 MultiPlatform                idx 16 
+      0x4540 KeyboardLayout2              idx 17 
+      0x00c3 SecureDfuControl             idx 18 
+      0x1802 DeviceReset                  idx 19 hidden engineering
+      0x1803 GpioAccess                   idx 20 hidden engineering
+      0x1807 ?                            idx 21 hidden engineering
+      0x1816 ?                            idx 22 hidden engineering
+      0x1805 OobState                     idx 23 hidden engineering
+      0x1830 PowerModes                   idx 24 hidden engineering
+      0x1891 ?                            idx 25 hidden engineering
+      0x18a1 LedControl                   idx 26 hidden engineering
+      0x1e00 EnableHiddenFeatures         idx 27 hidden
+      0x1e02 ?                            idx 28 hidden engineering
+      0x1602 ?                            idx 29 
+      0x1eb0 TdeAccessToNvm               idx 30 hidden engineering
+      0x1861 BatteryCalibration           idx 31 hidden engineering
+      0x1a20 ALSCalibration               idx 32 hidden engineering
+      0x18b0 DeviceInformation            idx 33 hidden engineering
+    name: MX Keys S (keyboard)
+    firmware bootloader: BL188.02.B0023
+    firmware main app: RBK81.02.B0023
+    firmware softdevice: 00.00.B0294
+    unified battery: 100 %, level full, charge complete, external power True
+  device 2: HID++ 4.5
+    features (36):
+      0x0001 IFeatureSet                  idx  1 
+      0x0003 DeviceFwVersion              idx  2 
+      0x0005 DeviceName                   idx  3 
+      0x1d4b WirelessDeviceStatus         idx  4 
+      0x0020 ConfigChange                 idx  5 
+      0x0021 UniqueIdentifier             idx  6 
+      0x0007 DeviceFriendlyName           idx  7 
+      0x1004 UnifiedBattery               idx  8 
+      0x1b04 ReprogControlsV4             idx  9 
+      0x1814 ChangeHost                   idx 10 
+      0x1815 HostsInfo                    idx 11 
+      0x2250 ExtendedAdjustableDpi        idx 12 
+      0x2201 AdjustableDpi                idx 13 
+      0x2110 SmartShift                   idx 14 
+      0x2121 HiResWheel                   idx 15 
+      0x2150 Thumbwheel                   idx 16 
+      0x2251 MouseWheelAnalytics          idx 17 
+      0x00c3 SecureDfuControl             idx 18 
+      0x1802 DeviceReset                  idx 19 hidden engineering
+      0x1803 GpioAccess                   idx 20 hidden engineering
+      0x1806 ConfigurableDeviceProperties idx 21 hidden engineering
+      0x1816 ?                            idx 22 hidden engineering
+      0x1805 OobState                     idx 23 hidden engineering
+      0x1830 PowerModes                   idx 24 hidden engineering
+      0x1891 ?                            idx 25 hidden engineering
+      0x18a1 LedControl                   idx 26 hidden engineering
+      0x1e00 EnableHiddenFeatures         idx 27 hidden
+      0x1e02 ?                            idx 28 hidden engineering
+      0x1602 ?                            idx 29 
+      0x1eb0 TdeAccessToNvm               idx 30 hidden engineering
+      0x1861 BatteryCalibration           idx 31 hidden engineering
+      0x9300 Lis3Dh                       idx 32 hidden engineering
+      0x9001 Pmw3816AndPmw3826            idx 33 hidden engineering
+      0x1e22 SpiDirectAccess              idx 34 hidden engineering
+      0x9203 ?                            idx 35 hidden engineering
+      0x9205 ?                            idx 36 hidden engineering
+    name: MX Master 3S (mouse)
+    firmware bootloader: BL169.02.B0009
+    firmware main app: RBM22.02.B0009
+    firmware softdevice: 00.00.B0294
+    unified battery: 85 %, level full, discharging, external power False
+    dpi sensor 0: 1000 dpi
+  device 3: HID++1.0 error 0x09
+  device 4: HID++1.0 error 0x09
+  device 5: HID++1.0 error 0x09
+  device 6: HID++1.0 error 0x09
