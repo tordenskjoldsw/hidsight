@@ -107,14 +107,20 @@ std::uint16_t featureIdAt(std::span<const std::uint8_t> params)
 
 } // namespace
 
-void IdentifierRedactor::observeRequest(const Report &request)
+void CaptureFilter::observeRequest(const Report &request)
 {
     m_request = request;
 }
 
-Report IdentifierRedactor::redact(const Report &report)
+std::optional<Report> CaptureFilter::filter(const Report &report)
 {
-    if (!m_request || matchReply(*m_request, report) != ReplyMatch::Reply) {
+    const ReplyMatch match = m_request ? matchReply(*m_request, report) : ReplyMatch::None;
+    if (match == ReplyMatch::None) {
+        const bool isEvent =
+            report.deviceIndex() != ReceiverIndex && report.subId() != Error10SubId && report.subId() != Error20FeatureIndex && (report.address() & 0x0F) == 0;
+        return isEvent ? std::optional<Report>(report) : std::nullopt;
+    }
+    if (match != ReplyMatch::Reply) {
         return report;
     }
     const Report &request = *m_request;
@@ -164,7 +170,9 @@ RecordingChannel::RecordingChannel(std::unique_ptr<Channel> inner, QIODevice *ou
     , m_output(output)
 {
     connect(m_inner.get(), &Channel::reportReceived, this, [this](const Report &report) {
-        write(CaptureEntry::Direction::Received, m_redactor.redact(report));
+        if (const auto kept = m_filter.filter(report)) {
+            write(CaptureEntry::Direction::Received, *kept);
+        }
         Q_EMIT reportReceived(report);
     });
     connect(m_inner.get(), &Channel::disconnected, this, &Channel::disconnected);
@@ -174,7 +182,7 @@ RecordingChannel::~RecordingChannel() = default;
 
 std::optional<Error> RecordingChannel::send(const Report &report)
 {
-    m_redactor.observeRequest(report);
+    m_filter.observeRequest(report);
     write(CaptureEntry::Direction::Sent, report);
     return m_inner->send(report);
 }

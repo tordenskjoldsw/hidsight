@@ -97,10 +97,11 @@ private Q_SLOTS:
 
     void redactsIdentifiers()
     {
-        IdentifierRedactor redactor;
-        const auto exchange = [&redactor](const QByteArray &request, const QByteArray &reply) {
-            redactor.observeRequest(parseCapture(QByteArray("> " + request)).value().front().report);
-            return formatCaptureLine({CaptureEntry::Direction::Received, redactor.redact(parseCapture(QByteArray("< " + reply)).value().front().report)});
+        CaptureFilter filter;
+        const auto exchange = [&filter](const QByteArray &request, const QByteArray &reply) {
+            filter.observeRequest(parseCapture(QByteArray("> " + request)).value().front().report);
+            const auto kept = filter.filter(parseCapture(QByteArray("< " + reply)).value().front().report);
+            return kept ? formatCaptureLine({CaptureEntry::Direction::Received, *kept}) : QByteArray();
         };
         const QByteArray zeros(" 00 00 00 00 00 00 00 00 00 00 00 00 00");
 
@@ -122,6 +123,28 @@ private Q_SLOTS:
                  "< 11 02 08 1a 55 08 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n");
         QCOMPARE(exchange("10 03 02 0a 00 00 00", "11 03 02 0a 03 de ad be ef 00 02 b3 78 00 00 00 00 00 01 00"),
                  "< 11 03 02 0a 03 de ad be ef 00 02 b3 78 00 00 00 00 00 01 00\n");
+    }
+
+    void keepsOnlyOwnRepliesAndEvents()
+    {
+        CaptureFilter filter;
+        const auto received = [&filter](const QByteArray &reply) {
+            const auto kept = filter.filter(parseCapture(QByteArray("< " + reply)).value().front().report);
+            return kept.has_value();
+        };
+        filter.observeRequest(parseCapture("> 10 01 08 1b 00 00 00").value().front().report);
+
+        // The reply to this request and its error form.
+        QVERIFY(received("10 01 08 1b 55 08 00"));
+        QVERIFY(received("10 01 ff 08 1b 05 00"));
+        // A battery event and a WirelessDeviceStatus event.
+        QVERIFY(received("11 01 08 00 64 08 01 01 00 00 00 00 00 00 00 00 00 00 00 00"));
+        QVERIFY(received("11 02 04 00 01 01 01 00 00 00 00 00 00 00 00 00 00 00 00 00"));
+        // Replies and errors for another program, also at the receiver.
+        QVERIFY(!received("11 01 02 0a 03 de ad be ef 00 02 b3 78 00 00 00 00 00 01 00"));
+        QVERIFY(!received("10 01 ff 02 0a 05 00"));
+        QVERIFY(!received("10 ff 83 b5 51 00 00"));
+        QVERIFY(!received("10 02 8f 00 1a 04 00"));
     }
 
     void retriesWhereTheCaptureHasNoAnswer()

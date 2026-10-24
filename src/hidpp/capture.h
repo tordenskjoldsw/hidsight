@@ -38,16 +38,21 @@ QByteArray formatCaptureLine(const CaptureEntry &entry);
 // that replays it; the default when the capture has none.
 std::uint8_t captureSoftwareId(const std::vector<CaptureEntry> &entries);
 
-// Replaces the identifiers of a device in replies by zeros: the unit id in
-// the DeviceFwVersion entity count and four bytes of unknown meaning in each
-// firmware entry, which differ between devices of the desk. It learns the
-// feature index of DeviceFwVersion from the Root and FeatureSet replies that
-// pass by, so it needs every request and reply in order.
-class IdentifierRedactor
+// Decides what of the received reports goes into a capture. Only replies to
+// the recording program's own requests and device events are kept: replies
+// to another program on the same node are not needed for replay and can
+// carry identifiers (seen on the desk: the app's DeviceFwVersion replies in a
+// capture of the CLI). In the kept replies the identifiers of a device are
+// replaced by zeros: the unit id in the DeviceFwVersion entity count and four
+// bytes of unknown meaning in each firmware entry, which differ between the
+// devices of the desk. The filter learns the feature index of DeviceFwVersion
+// from the Root and FeatureSet replies, so it needs every request in order.
+class CaptureFilter
 {
 public:
     void observeRequest(const Report &request);
-    Report redact(const Report &report);
+    // Nothing when the report stays out of the capture.
+    std::optional<Report> filter(const Report &report);
 
 private:
     std::optional<Report> m_request;
@@ -56,7 +61,7 @@ private:
 };
 
 // Passes everything to another channel and writes each report to output,
-// with the identifiers zeroed (IdentifierRedactor).
+// as CaptureFilter lets it through.
 class RecordingChannel : public Channel
 {
     Q_OBJECT
@@ -73,7 +78,7 @@ private:
 
     std::unique_ptr<Channel> m_inner;
     QPointer<QIODevice> m_output;
-    IdentifierRedactor m_redactor;
+    CaptureFilter m_filter;
 };
 
 // Plays a capture back: each request must be the next one sent in the
