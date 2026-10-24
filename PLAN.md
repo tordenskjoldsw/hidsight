@@ -270,6 +270,14 @@ in plain words; empty states for no device and no permission; about
 page; light and dark; keyboard navigation; strings through KI18n.
 Verified against the KDE HIG checklist and with both color schemes.
 
+Known upstream issue (2026-10-24): Kirigami 6.31 prints two warnings when
+a device page opens, "Binding loop detected" in PrivateActionToolButton
+(from the menu-style global drawer) and "Created graphical object was not
+placed in the graphics scene" (from PageRow.push). Both reproduce with
+Kirigami alone and are unchanged on Kirigami master. Hidsight uses the
+documented API and does not work around them; a fix for each, tested
+against a patched copy of Kirigami, is to be proposed upstream.
+
 ### Phase 4 - Tray and notifications
 
 Section 8. Verified: a low battery notification by letting the mouse
