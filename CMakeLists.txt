@@ -48,6 +48,7 @@ set(HIDSIGHT_UDEV_RULES_DIR "lib/udev/rules.d" CACHE PATH
     "Directory for the udev rule, relative to the install prefix")
 
 add_subdirectory(src/hidpp)
+add_subdirectory(src/cli)
 add_subdirectory(src/app)
 add_subdirectory(data)
 
