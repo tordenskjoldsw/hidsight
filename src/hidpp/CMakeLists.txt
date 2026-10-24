@@ -2,11 +2,19 @@
 # SPDX-License-Identifier: MIT
 
 add_library(hidsight_hidpp STATIC
+    battery.cpp battery.h
     channel.h
+    device.cpp device.h
+    devicefwversion.cpp devicefwversion.h
+    devicename.cpp devicename.h
     dispatcher.cpp dispatcher.h
     hidrawchannel.cpp hidrawchannel.h
+    pointer.cpp pointer.h
+    probe.cpp probe.h
+    receiver.cpp receiver.h
     report.cpp report.h
     result.h
+    sequence_p.h
 )
 
 ecm_qt_declare_logging_category(hidsight_hidpp
