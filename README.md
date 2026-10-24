@@ -71,6 +71,8 @@ hidsight-cli /dev/hidraw3
 hidsight-cli --json /dev/hidraw3
 ```
 
+`--watch` keeps reading and prints every change: a battery event, a
+device that wakes up or is switched on, one that stops answering.
 `--record <file>` writes every report sent and received to a capture
 file, and `--replay <file>` reads a capture instead of a node. The tests
 replay captures recorded this way. A capture holds the raw reports of

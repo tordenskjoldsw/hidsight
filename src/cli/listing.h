@@ -5,6 +5,7 @@
 
 #include "hidpp/dispatcher.h"
 #include "hidpp/probe.h"
+#include "hidpp/receiversession.h"
 
 #include <QJsonObject>
 #include <QString>
@@ -27,3 +28,5 @@ void listReceiver(hidpp::Dispatcher &dispatcher, const QString &source, std::fun
 QString formatText(const Listing &listing);
 QJsonObject formatJson(const Listing &listing);
 QString errorText(const hidpp::Error &error);
+// One line for a device of a watched receiver.
+QString formatState(const hidpp::DeviceState &state);

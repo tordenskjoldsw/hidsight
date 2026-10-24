@@ -5,6 +5,7 @@
 
 #include "hidpp/capture.h"
 #include "hidpp/hidrawchannel.h"
+#include "hidpp/receiversession.h"
 
 #include "hidsight-version.h"
 
@@ -14,9 +15,11 @@
 #include <QCommandLineParser>
 #include <QCoreApplication>
 #include <QDateTime>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QJsonDocument>
 #include <QTextStream>
+#include <QTimer>
 
 #include <memory>
 
@@ -69,6 +72,35 @@ hidpp::Result<std::unique_ptr<hidpp::Channel>> openNode(const QString &path)
     return std::unique_ptr<hidpp::Channel>(std::move(channel).value());
 }
 
+int watch(std::unique_ptr<hidpp::Channel> channel, std::uint8_t softwareId, hidpp::ReplayChannel *replayChannel)
+{
+    hidpp::ReceiverSession session(std::move(channel));
+    session.setSoftwareId(softwareId);
+    if (replayChannel) {
+        session.setTimeout(ReplayTimeout);
+        // A capture has no end of its own; stop once the session has had time
+        // to handle its last reports.
+        QObject::connect(replayChannel, &hidpp::ReplayChannel::finished, &session, [] {
+            QTimer::singleShot(ReplayTimeout * 4, QCoreApplication::instance(), &QCoreApplication::quit);
+        });
+    }
+    QElapsedTimer clock;
+    clock.start();
+    QTextStream out(stdout);
+    QObject::connect(&session, &hidpp::ReceiverSession::deviceChanged, &session, [&](const hidpp::DeviceState &state) {
+        out << i18nc("@info milliseconds since start, change", "%1 ms  %2", QString::number(clock.elapsed()), formatState(state)) << Qt::endl;
+    });
+    QObject::connect(&session, &hidpp::ReceiverSession::deviceRemoved, &session, [&](std::uint8_t index) {
+        out << i18nc("@info milliseconds since start, device index", "%1 ms  Device %2: removed", QString::number(clock.elapsed()), index) << Qt::endl;
+    });
+    QObject::connect(&session, &hidpp::ReceiverSession::failed, &session, [&](const hidpp::Error &error) {
+        err() << i18nc("@info reason", "The receiver is gone: %1", errorText(error)) << Qt::endl;
+        QCoreApplication::exit(1);
+    });
+    session.start();
+    return QCoreApplication::exec();
+}
+
 } // namespace
 
 int main(int argc, char *argv[])
@@ -96,7 +128,8 @@ int main(int argc, char *argv[])
     const QCommandLineOption replayOption(u"replay"_s,
                                           i18n("Read the reports from a capture <file> instead of a node."),
                                           i18nc("@info command line value", "file"));
-    parser.addOptions({jsonOption, recordOption, replayOption});
+    const QCommandLineOption watchOption(u"watch"_s, i18n("Keep reading the receiver and print every change of a device until interrupted."));
+    parser.addOptions({jsonOption, recordOption, replayOption, watchOption});
     parser.process(app);
     about.processCommandLine(&parser);
 
@@ -124,7 +157,8 @@ int main(int argc, char *argv[])
     QFile recording;
     if (parser.isSet(recordOption)) {
         recording.setFileName(parser.value(recordOption));
-        if (!recording.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text)) {
+        // Unbuffered, so a watch ended with Ctrl+C leaves a complete capture.
+        if (!recording.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text | QIODevice::Unbuffered)) {
             err() << i18n("Cannot write %1: %2", recording.fileName(), recording.errorString()) << Qt::endl;
             return 1;
         }
@@ -132,6 +166,10 @@ int main(int argc, char *argv[])
             u"# Recorded by hidsight-cli %1 from %2 on %3\n"_s.arg(QStringLiteral(HIDSIGHT_VERSION_STRING), source, QDate::currentDate().toString(Qt::ISODate))
                 .toUtf8());
         channel = std::make_unique<hidpp::RecordingChannel>(std::move(channel), &recording);
+    }
+
+    if (parser.isSet(watchOption)) {
+        return watch(std::move(channel), softwareId, replayChannel);
     }
 
     hidpp::Dispatcher dispatcher(channel.get());

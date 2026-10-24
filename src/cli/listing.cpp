@@ -346,6 +346,41 @@ QString errorText(const Error &error)
     return {};
 }
 
+QString formatState(const DeviceState &state)
+{
+    QStringList parts;
+    switch (state.status) {
+    case DeviceStatus::Reading:
+        parts << i18nc("@info device status", "reading");
+        break;
+    case DeviceStatus::Online:
+        parts << i18nc("@info device status", "online");
+        break;
+    case DeviceStatus::Unreachable:
+        parts << i18nc("@info device status, reason", "not reachable (%1)", state.error ? errorText(*state.error) : QString());
+        break;
+    }
+    if (state.name) {
+        parts << i18nc("@info device name, kind", "%1, %2", state.name->name, kindText(state.name->kind));
+    }
+    if (state.battery) {
+        parts << i18nc("@info", "battery %1", batteryText(*state.battery));
+    }
+    if (state.complete) {
+        if (state.firmware) {
+            for (const FirmwareEntry &entry : state.firmware->entries) {
+                if (entry.type == FirmwareType::MainApplication) {
+                    parts << i18nc("@info firmware version", "firmware %1", entry.version());
+                }
+            }
+        }
+        if (state.dpi && !state.dpi->sensorDpi.empty()) {
+            parts << i18nc("@info resolution", "%1 dpi", state.dpi->sensorDpi.front());
+        }
+    }
+    return i18nc("@info device index, details", "Device %1: %2", state.index, parts.join(u"; "_s));
+}
+
 QString formatText(const Listing &listing)
 {
     QStringList lines;
