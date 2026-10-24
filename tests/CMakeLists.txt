@@ -3,6 +3,7 @@
 
 ecm_add_tests(
     capturetest.cpp
+    descriptortest.cpp
     dispatchertest.cpp
     parsertest.cpp
     reporttest.cpp
