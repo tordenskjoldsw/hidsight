@@ -11,6 +11,7 @@
 
 #include "devicemanager.h"
 #include "hidsight-version.h"
+#include "qmltypes.h"
 
 using namespace Qt::StringLiterals;
 
@@ -33,6 +34,8 @@ int main(int argc, char *argv[])
                      i18n("© 2026 Tobias Kaminski"));
     about.addAuthor(i18n("Tobias Kaminski"), i18n("Maintainer"));
     about.setOrganizationDomain("tordenskjold.de");
+    about.setHomepage(u"https://github.com/tordenskjoldsw/hidsight"_s);
+    about.setBugAddress("https://github.com/tordenskjoldsw/hidsight/issues");
     // Also the Wayland app id, which lets Plasma match the window to the
     // desktop file and its icon.
     about.setDesktopFileName(u"de.tordenskjold.hidsight"_s);
@@ -40,6 +43,7 @@ int main(int argc, char *argv[])
     QApplication::setWindowIcon(QIcon::fromTheme(u"de.tordenskjold.hidsight"_s));
 
     DeviceManager devices;
+    DeviceManagerForeign::instance = &devices;
     devices.start();
 
     QQmlApplicationEngine engine;

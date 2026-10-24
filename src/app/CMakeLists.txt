@@ -25,11 +25,15 @@ target_link_libraries(hidsight_app
     PRIVATE UDev::UDev KF6::CoreAddons KF6::I18n
 )
 
-add_executable(hidsight main.cpp)
+add_executable(hidsight main.cpp qmltypes.cpp qmltypes.h)
 
 # The QML files live in the top-level qml/ directory; the alias keeps their
 # resource paths flat, as if they were next to this file.
-set(HIDSIGHT_QML_FILES ${PROJECT_SOURCE_DIR}/qml/Main.qml)
+set(HIDSIGHT_QML_FILES
+    ${PROJECT_SOURCE_DIR}/qml/Main.qml
+    ${PROJECT_SOURCE_DIR}/qml/DevicesPage.qml
+    ${PROJECT_SOURCE_DIR}/qml/DevicePage.qml
+)
 foreach(qml_file IN LISTS HIDSIGHT_QML_FILES)
     get_filename_component(qml_name ${qml_file} NAME)
     set_source_files_properties(${qml_file} PROPERTIES QT_RESOURCE_ALIAS ${qml_name})

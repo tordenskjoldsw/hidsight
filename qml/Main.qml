@@ -9,12 +9,16 @@ Kirigami.ApplicationWindow {
 
     title: i18nc("@title:window", "Hidsight")
 
-    width: Kirigami.Units.gridUnit * 30
-    height: Kirigami.Units.gridUnit * 30
+    width: Kirigami.Units.gridUnit * 44
+    height: Kirigami.Units.gridUnit * 32
     minimumWidth: Kirigami.Units.gridUnit * 20
     minimumHeight: Kirigami.Units.gridUnit * 15
 
-    pageStack.initialPage: Kirigami.Page {
-        title: i18nc("@title", "Devices")
+    pageStack.initialPage: DevicesPage {}
+    pageStack.globalToolBar.style: Kirigami.ApplicationHeaderStyle.ToolBar
+
+    Shortcut {
+        sequences: [StandardKey.Quit]
+        onActivated: Qt.quit()
     }
 }
