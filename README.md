@@ -1,7 +1,7 @@
 # Hidsight
 
 <p align="center">
-  <img src="data/icons/de.tordenskjold.hidsight.svg" width="128" height="128" alt="Hidsight icon: a mouse in front of a blue ring">
+  <img src="data/icons/de.tordenskjold.hidsight.svg" width="128" height="128" alt="Hidsight icon: a keyboard and a mouse in a blue ring">
 </p>
 
 A native Plasma application that shows the state of Logitech keyboards
