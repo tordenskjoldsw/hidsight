@@ -336,13 +336,19 @@ reporting upstream; German translation.
   of a sleeping device gets 0x04 at once and does not wake it. A device
   that falls asleep stays "online" in the list until the next re-read
   finds it.
-- **Autostart mechanism.** XDG autostart desktop file written by the
-  app, or a KConfig-managed entry. Decide in Phase 4.
-- **Tray icons.** A symbolic icon set for the battery levels in the
-  tray; design in Phase 4.
 
 Decided:
 
+- 2026-10-24: the tray shows Breeze's symbolic battery icons
+  (battery-NNN-symbolic and their charging variants), the set Plasma's
+  own battery widget uses, so the tray item fits the panel and follows
+  the colour scheme. No icon set of Hidsight's own.
+- 2026-10-24: autostart goes through the background portal
+  (org.freedesktop.portal.Background, RequestBackground with autostart),
+  which Plasma 6 supports and which keeps working under Flatpak. Whether
+  it accepts an installed, unsandboxed Hidsight is to be verified on the
+  desk in Phase 4; if not, Hidsight writes an XDG autostart file
+  instead.
 - 2026-10-24: the app icon is a keyboard with a mouse above it inside a
   blue ring that is open like a gauge, in Breeze colours: the state of
   the devices at a glance, and not tied to the battery, since a later
