@@ -14,6 +14,7 @@ add_library(hidsight_hidpp STATIC
     pointer.cpp pointer.h
     probe.cpp probe.h
     receiver.cpp receiver.h
+    receiversession.cpp receiversession.h
     reportdescriptor.cpp reportdescriptor.h
     report.cpp report.h
     result.h

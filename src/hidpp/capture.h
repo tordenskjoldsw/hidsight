@@ -101,6 +101,10 @@ public:
     // The software id the capture was recorded with.
     std::uint8_t softwareId() const;
 
+Q_SIGNALS:
+    // Every report of the capture was sent or handed out for delivery.
+    void finished();
+
 private:
     std::vector<Report> takeReceived();
 

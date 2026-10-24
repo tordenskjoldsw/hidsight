@@ -152,4 +152,17 @@ QLatin1StringView key(ErrorKind kind)
     return {};
 }
 
+QLatin1StringView key(DeviceStatus status)
+{
+    switch (status) {
+    case DeviceStatus::Reading:
+        return "reading"_L1;
+    case DeviceStatus::Online:
+        return "online"_L1;
+    case DeviceStatus::Unreachable:
+        return "unreachable"_L1;
+    }
+    return {};
+}
+
 } // namespace hidpp

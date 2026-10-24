@@ -6,6 +6,7 @@
 #include "battery.h"
 #include "devicefwversion.h"
 #include "devicename.h"
+#include "receiversession.h"
 #include "result.h"
 
 #include <QLatin1StringView>
@@ -21,5 +22,6 @@ QLatin1StringView key(BatteryLevel level);
 QLatin1StringView key(ChargingState state);
 QLatin1StringView key(Battery::Source source);
 QLatin1StringView key(ErrorKind kind);
+QLatin1StringView key(DeviceStatus status);
 
 } // namespace hidpp

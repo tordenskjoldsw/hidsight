@@ -221,6 +221,9 @@ std::optional<Error> ReplayChannel::send(const Report &report)
         for (const Report &reply : received) {
             Q_EMIT reportReceived(reply);
         }
+        if (isAtEnd()) {
+            Q_EMIT finished();
+        }
     });
     return std::nullopt;
 }
