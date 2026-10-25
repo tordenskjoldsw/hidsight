@@ -81,6 +81,10 @@ QVariant DeviceModel::data(const QModelIndex &index, int role) const
         return DeviceTexts::kindText(kind);
     case IconNameRole:
         return DeviceTexts::kindIconName(kind);
+    case IllustrationRole:
+        return DeviceTexts::illustrationName(kind);
+    case SlotTextRole:
+        return DeviceTexts::slotText(row.receiverId, state.index);
     case StatusRole:
         return QString(hidpp::key(state.status));
     case StatusTextRole:
@@ -152,6 +156,8 @@ QHash<int, QByteArray> DeviceModel::roleNames() const
         {KindRole, "kind"},
         {KindTextRole, "kindText"},
         {IconNameRole, "iconName"},
+        {IllustrationRole, "illustration"},
+        {SlotTextRole, "slotText"},
         {StatusRole, "status"},
         {StatusTextRole, "statusText"},
         {OnlineRole, "online"},

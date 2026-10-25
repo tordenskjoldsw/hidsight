@@ -104,6 +104,21 @@ QString kindIconName(DeviceKind kind)
     return u"preferences-desktop-peripherals"_s;
 }
 
+QString illustrationName(DeviceKind kind)
+{
+    switch (kind) {
+    case DeviceKind::Keyboard:
+    case DeviceKind::Numpad:
+        return u"keyboard"_s;
+    case DeviceKind::Mouse:
+    case DeviceKind::Trackball:
+    case DeviceKind::Trackpad:
+        return u"mouse"_s;
+    default:
+        return {};
+    }
+}
+
 QString chargingText(ChargingState state)
 {
     switch (state) {
@@ -410,6 +425,11 @@ QString receiverText(const QString &receiverId)
         return i18nc("@info receiver model", "Logi Bolt receiver");
     }
     return i18nc("@info receiver model", "Logitech receiver");
+}
+
+QString slotText(const QString &receiverId, std::uint8_t index)
+{
+    return i18nc("@info receiver slot, receiver model", "Slot %1 · %2", index, receiverText(receiverId));
 }
 
 } // namespace DeviceTexts

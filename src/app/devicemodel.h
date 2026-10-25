@@ -24,6 +24,8 @@ public:
         KindRole,
         KindTextRole,
         IconNameRole,
+        IllustrationRole,
+        SlotTextRole,
         StatusRole,
         StatusTextRole,
         OnlineRole,

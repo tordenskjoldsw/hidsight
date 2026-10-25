@@ -17,6 +17,9 @@ namespace DeviceTexts
 
 QString kindText(hidpp::DeviceKind kind);
 QString kindIconName(hidpp::DeviceKind kind);
+// Hidsight's own drawing of the kind of device ("keyboard", "mouse"), or
+// empty for a kind without one, which shows its icon instead.
+QString illustrationName(hidpp::DeviceKind kind);
 
 QString batteryText(const hidpp::Battery &battery);
 // The charge in percent, from the percentage or from the reported level;
@@ -47,5 +50,7 @@ QString featureDetail(std::uint16_t featureId);
 
 // The receiver by its USB product id, for example "046d:c548".
 QString receiverText(const QString &receiverId);
+// Where the device is paired, for example "Slot 1 · Logi Bolt receiver".
+QString slotText(const QString &receiverId, std::uint8_t index);
 
 } // namespace DeviceTexts
