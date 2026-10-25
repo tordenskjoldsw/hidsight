@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 import QtQuick
+import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 import de.tordenskjold.hidsight
@@ -10,6 +11,24 @@ Kirigami.ScrollablePage {
     id: page
 
     title: i18nc("@title", "Devices")
+
+    titleDelegate: RowLayout {
+        spacing: Kirigami.Units.largeSpacing
+
+        Kirigami.Heading {
+            text: page.title
+            level: 1
+        }
+        QQC2.Label {
+            visible: cards.count > 0
+            text: i18ncp("@info number of devices", "1 device", "%1 devices", cards.count)
+            color: Kirigami.Theme.disabledTextColor
+            Layout.alignment: Qt.AlignBaseline
+        }
+        Item {
+            Layout.fillWidth: true
+        }
+    }
 
     function openDevice(key: string) {
         const stack = page.Kirigami.PageStack.pageStack;
