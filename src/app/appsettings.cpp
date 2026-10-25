@@ -13,6 +13,7 @@ namespace
 const auto NotifyLowBatteryKey = "NotifyLowBattery";
 const auto NotifyChargeCompleteKey = "NotifyChargeComplete";
 const auto StartHiddenKey = "StartHidden";
+const auto ShowTechnicalDetailsKey = "ShowTechnicalDetails";
 
 } // namespace
 
@@ -50,6 +51,16 @@ bool AppSettings::startHidden() const
 void AppSettings::setStartHidden(bool enabled)
 {
     write(StartHiddenKey, enabled);
+}
+
+bool AppSettings::showTechnicalDetails() const
+{
+    return read(ShowTechnicalDetailsKey, false);
+}
+
+void AppSettings::setShowTechnicalDetails(bool enabled)
+{
+    write(ShowTechnicalDetailsKey, enabled);
 }
 
 bool AppSettings::read(const char *key, bool fallback) const

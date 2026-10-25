@@ -16,6 +16,9 @@ class AppSettings : public QObject
     Q_PROPERTY(bool notifyChargeComplete READ notifyChargeComplete WRITE setNotifyChargeComplete NOTIFY changed)
     // Start with only the tray item, without the window.
     Q_PROPERTY(bool startHidden READ startHidden WRITE setStartHidden NOTIFY changed)
+    // The features and the protocol version on the device page; off, the
+    // page shows what matters day to day.
+    Q_PROPERTY(bool showTechnicalDetails READ showTechnicalDetails WRITE setShowTechnicalDetails NOTIFY changed)
 
 public:
     explicit AppSettings(KSharedConfig::Ptr config = KSharedConfig::openConfig(), QObject *parent = nullptr);
@@ -26,6 +29,8 @@ public:
     void setNotifyChargeComplete(bool enabled);
     bool startHidden() const;
     void setStartHidden(bool enabled);
+    bool showTechnicalDetails() const;
+    void setShowTechnicalDetails(bool enabled);
 
 Q_SIGNALS:
     void changed();

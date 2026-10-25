@@ -127,7 +127,7 @@ FormCard.FormCardPage {
             }
             FormCard.FormTextDelegate {
                 id: protocolDelegate
-                visible: (page.device.protocol ?? "") !== ""
+                visible: Settings.showTechnicalDetails && (page.device.protocol ?? "") !== ""
                 text: i18nc("@label", "Protocol")
                 description: i18nc("@info protocol version", "HID++ %1", page.device.protocol ?? "")
             }
@@ -164,8 +164,11 @@ FormCard.FormCardPage {
 
         FormCard.FormHeader {
             title: i18nc("@title:group", "Features")
+            visible: Settings.showTechnicalDetails
         }
         FormCard.FormCard {
+            visible: Settings.showTechnicalDetails
+
             FormCard.FormTextDelegate {
                 visible: (page.device.features ?? []).length === 0
                 text: page.device.online ? i18nc("@info", "Reading…") : i18nc("@info", "Read when the device answers")

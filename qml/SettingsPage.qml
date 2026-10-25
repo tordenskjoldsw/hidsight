@@ -32,6 +32,18 @@ FormCard.FormCardPage {
     }
 
     FormCard.FormHeader {
+        title: i18nc("@title:group", "Device page")
+    }
+    FormCard.FormCard {
+        FormCard.FormSwitchDelegate {
+            text: i18nc("@option:check", "Show technical details")
+            description: i18nc("@info", "The features of the device and the protocol version.")
+            checked: Settings.showTechnicalDetails
+            onToggled: Settings.showTechnicalDetails = checked
+        }
+    }
+
+    FormCard.FormHeader {
         title: i18nc("@title:group", "Start")
     }
     FormCard.FormCard {
