@@ -43,6 +43,9 @@ set(HIDSIGHT_QML_FILES
     ${PROJECT_SOURCE_DIR}/qml/DevicesPage.qml
     ${PROJECT_SOURCE_DIR}/qml/DevicePage.qml
     ${PROJECT_SOURCE_DIR}/qml/SettingsPage.qml
+    ${PROJECT_SOURCE_DIR}/qml/BatteryRing.qml
+    ${PROJECT_SOURCE_DIR}/qml/DeviceCard.qml
+    ${PROJECT_SOURCE_DIR}/qml/StatusChips.qml
 )
 foreach(qml_file IN LISTS HIDSIGHT_QML_FILES)
     get_filename_component(qml_name ${qml_file} NAME)

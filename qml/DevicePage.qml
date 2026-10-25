@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 import QtQuick
+import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 import org.kde.kirigamiaddons.formcard as FormCard
@@ -31,30 +32,53 @@ FormCard.FormCardPage {
         spacing: 0
         Layout.fillWidth: true
 
-        RowLayout {
+        // The charge at a glance, as on the device's card.
+        ColumnLayout {
             spacing: Kirigami.Units.largeSpacing
             Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
             Layout.topMargin: Kirigami.Units.gridUnit
-            Layout.bottomMargin: Kirigami.Units.largeSpacing
+            Layout.bottomMargin: Kirigami.Units.gridUnit
 
-            Kirigami.Icon {
-                source: page.device.iconName ?? ""
-                Layout.preferredWidth: Kirigami.Units.iconSizes.huge
-                Layout.preferredHeight: Kirigami.Units.iconSizes.huge
+            BatteryRing {
+                fraction: page.device.batteryFraction ?? -1
+                tone: page.device.batteryTone ?? "unknown"
+                iconName: page.device.iconName ?? ""
+                label: (page.device.batteryPercentage ?? -1) >= 0 ? i18nc("@info battery charge", "%1 %", page.device.batteryPercentage) : "–"
+                opacity: page.device.online ? 1 : 0.5
+                Layout.alignment: Qt.AlignHCenter
+                Layout.preferredWidth: Kirigami.Units.gridUnit * 10
+                Layout.preferredHeight: Kirigami.Units.gridUnit * 10
+
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: Kirigami.Units.longDuration
+                    }
+                }
             }
 
             ColumnLayout {
                 spacing: 0
+                Layout.fillWidth: true
 
                 Kirigami.Heading {
                     text: page.device.name ?? ""
                     level: 1
+                    wrapMode: Text.Wrap
+                    horizontalAlignment: Text.AlignHCenter
+                    Layout.fillWidth: true
                 }
-                Kirigami.Heading {
+                QQC2.Label {
                     text: page.device.kindText ?? ""
-                    level: 4
-                    type: Kirigami.Heading.Type.Secondary
+                    color: Kirigami.Theme.disabledTextColor
+                    horizontalAlignment: Text.AlignHCenter
+                    Layout.fillWidth: true
                 }
+            }
+
+            StatusChips {
+                chips: page.device.statusChips ?? []
+                Layout.alignment: Qt.AlignHCenter
             }
         }
 
@@ -63,12 +87,15 @@ FormCard.FormCardPage {
         }
         FormCard.FormCard {
             FormCard.FormTextDelegate {
-                icon.name: page.device.batteryIconName ?? ""
+                id: chargeDelegate
+                // The ring shows a percentage; this row only for a device
+                // that reports a voltage or a level alone.
+                visible: (page.device.batteryPercentage ?? -1) < 0 && (page.device.batteryText ?? "") !== ""
                 text: i18nc("@label", "Charge")
-                description: page.device.batteryText || i18nc("@info", "Unknown")
+                description: page.device.batteryText ?? ""
             }
             FormCard.FormDelegateSeparator {
-                visible: levelDelegate.visible
+                visible: chargeDelegate.visible && levelDelegate.visible
             }
             FormCard.FormTextDelegate {
                 id: levelDelegate
@@ -77,31 +104,7 @@ FormCard.FormCardPage {
                 description: page.device.batteryLevelText ?? ""
             }
             FormCard.FormDelegateSeparator {
-                visible: chargingDelegate.visible
-            }
-            FormCard.FormTextDelegate {
-                id: chargingDelegate
-                visible: (page.device.chargingText ?? "") !== ""
-                text: i18nc("@label", "Charging")
-                description: page.device.chargingText ?? ""
-            }
-            FormCard.FormDelegateSeparator {}
-            FormCard.FormTextDelegate {
-                text: i18nc("@label", "External power")
-                description: page.device.externalPower ? i18nc("@info external power", "Connected") : i18nc("@info external power", "Not connected")
-            }
-        }
-
-        FormCard.FormHeader {
-            title: i18nc("@title:group", "Connection")
-        }
-        FormCard.FormCard {
-            FormCard.FormTextDelegate {
-                text: i18nc("@label", "Status")
-                description: page.device.online ? i18nc("@info device status", "Connected") : (page.device.statusText ?? "")
-            }
-            FormCard.FormDelegateSeparator {
-                visible: lastSeenDelegate.visible
+                visible: (chargeDelegate.visible || levelDelegate.visible) && lastSeenDelegate.visible
             }
             FormCard.FormTextDelegate {
                 id: lastSeenDelegate
@@ -109,7 +112,12 @@ FormCard.FormCardPage {
                 text: i18nc("@label time of the last answer", "Last answer")
                 description: page.device.lastSeenText ?? ""
             }
-            FormCard.FormDelegateSeparator {}
+        }
+
+        FormCard.FormHeader {
+            title: i18nc("@title:group", "Connection")
+        }
+        FormCard.FormCard {
             FormCard.FormTextDelegate {
                 text: i18nc("@label", "Receiver")
                 description: page.device.receiverText ?? ""
