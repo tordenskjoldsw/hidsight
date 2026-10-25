@@ -5,18 +5,35 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import org.kde.kirigamiaddons.formcard as FormCard
+import org.kde.kirigamiaddons.delegates as Delegates
 import de.tordenskjold.hidsight
 
-FormCard.FormCardPage {
+// One device, in place of the overview: its battery and connection in the
+// header, its sections in a side navigation, or as tabs in a narrow window.
+Kirigami.Page {
     id: page
 
     required property string deviceKey
 
     readonly property var details: DeviceManager.details(deviceKey)
     readonly property var device: details.device
+    readonly property bool wide: width > Kirigami.Units.gridUnit * 36
+    property int section: 0
+
+    // The sections of a device page; the settings join them later.
+    readonly property list<QtObject> sections: [
+        QtObject {
+            readonly property string text: i18nc("@title:tab device page section", "Overview")
+            readonly property string iconName: "dashboard-show-symbolic"
+        },
+        QtObject {
+            readonly property string text: i18nc("@title:tab device page section", "Details")
+            readonly property string iconName: "documentinfo-symbolic"
+        }
+    ]
 
     title: details.present ? device.name : i18nc("@title", "Device")
+    padding: 0
 
     function goBack() {
         page.Kirigami.PageStack.pageStack.removePage(page);
@@ -38,6 +55,27 @@ FormCard.FormCardPage {
             elide: Text.ElideRight
             Layout.fillWidth: true
         }
+
+        Kirigami.Icon {
+            visible: page.details.present && (page.device.online ?? false)
+            source: (page.device.batteryIconName ?? "battery-missing") + "-symbolic"
+            color: Tones.color(page.device.batteryTone ?? "unknown")
+            isMask: true
+            Layout.preferredWidth: Kirigami.Units.iconSizes.smallMedium
+            Layout.preferredHeight: Kirigami.Units.iconSizes.smallMedium
+        }
+        QQC2.Label {
+            visible: page.details.present && (page.device.online ?? false) && (page.device.batteryPercentage ?? -1) >= 0
+            text: i18nc("@info battery charge", "%1 %", page.device.batteryPercentage ?? 0)
+            color: Tones.color(page.device.batteryTone ?? "unknown")
+            font.weight: Font.DemiBold
+        }
+        Pill {
+            visible: page.details.present
+            text: (page.device.online ?? false) ? i18nc("@info:status", "Connected") : (page.device.status ?? "") === "reading" ? i18nc("@info:status", "Reading") : i18nc("@info:status", "Not connected")
+            dotColor: (page.device.online ?? false) ? Kirigami.Theme.positiveTextColor : Kirigami.Theme.disabledTextColor
+            Layout.rightMargin: Kirigami.Units.smallSpacing
+        }
     }
 
     Shortcut {
@@ -52,181 +90,90 @@ FormCard.FormCardPage {
     }
 
     Kirigami.PlaceholderMessage {
+        anchors.centerIn: parent
+        width: parent.width - Kirigami.Units.gridUnit * 4
         visible: !page.details.present
         icon.name: "preferences-desktop-peripherals"
         text: i18nc("@info:placeholder", "The device is gone")
         explanation: i18nc("@info:placeholder", "Its receiver was unplugged or it was unpaired.")
-        Layout.fillWidth: true
-        Layout.margins: Kirigami.Units.gridUnit * 2
     }
 
-    ColumnLayout {
+    RowLayout {
+        anchors.fill: parent
         visible: page.details.present
         spacing: 0
-        Layout.fillWidth: true
 
-        // The charge at a glance, as on the device's card.
-        ColumnLayout {
-            spacing: Kirigami.Units.largeSpacing
-            Layout.alignment: Qt.AlignHCenter
-            Layout.fillWidth: true
-            Layout.topMargin: Kirigami.Units.gridUnit
-            Layout.bottomMargin: Kirigami.Units.gridUnit
+        // The side navigation of a wide window.
+        Rectangle {
+            visible: page.wide
+            color: Kirigami.Theme.backgroundColor
+            Kirigami.Theme.colorSet: Kirigami.Theme.Window
+            Kirigami.Theme.inherit: false
+            Layout.preferredWidth: Kirigami.Units.gridUnit * 11
+            Layout.fillHeight: true
 
-            GridLayout {
-                columns: page.width > Kirigami.Units.gridUnit * 26 ? 2 : 1
-                columnSpacing: Kirigami.Units.gridUnit * 2
-                rowSpacing: Kirigami.Units.largeSpacing
-                opacity: page.device.online ? 1 : 0.5
-                Layout.alignment: Qt.AlignHCenter
+            ListView {
+                anchors.fill: parent
+                anchors.margins: Kirigami.Units.smallSpacing
+                model: page.sections
+                currentIndex: page.section
+                keyNavigationEnabled: true
+                activeFocusOnTab: true
+                Keys.onReturnPressed: page.section = currentIndex
 
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: Kirigami.Units.longDuration
-                    }
-                }
+                delegate: Delegates.RoundedItemDelegate {
+                    required property int index
+                    required property var modelData
 
-                DeviceIllustration {
-                    illustration: page.device.illustration ?? ""
-                    iconName: page.device.iconName ?? ""
-                    Layout.preferredWidth: Kirigami.Units.gridUnit * 14
-                    Layout.preferredHeight: Kirigami.Units.gridUnit * 8
-                    Layout.alignment: Qt.AlignCenter
-                }
-
-                BatteryRing {
-                    fraction: page.device.batteryFraction ?? -1
-                    tone: page.device.batteryTone ?? "unknown"
-                    label: (page.device.batteryPercentage ?? -1) >= 0 ? i18nc("@info battery charge", "%1 %", page.device.batteryPercentage) : "–"
-                    Layout.preferredWidth: Kirigami.Units.gridUnit * 7
-                    Layout.preferredHeight: Kirigami.Units.gridUnit * 7
-                    Layout.alignment: Qt.AlignCenter
+                    text: modelData.text
+                    icon.name: modelData.iconName
+                    highlighted: index === page.section
+                    onClicked: page.section = index
                 }
             }
 
-            ColumnLayout {
-                spacing: 0
+            Kirigami.Separator {
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.right: parent.right
+            }
+        }
+
+        ColumnLayout {
+            spacing: 0
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+
+            // The same sections as tabs in a narrow window.
+            QQC2.TabBar {
+                visible: !page.wide
+                currentIndex: page.section
                 Layout.fillWidth: true
 
-                Kirigami.Heading {
-                    text: page.device.name ?? ""
-                    level: 1
-                    wrapMode: Text.Wrap
-                    horizontalAlignment: Text.AlignHCenter
-                    Layout.fillWidth: true
-                }
-                QQC2.Label {
-                    text: page.device.kindText ?? ""
-                    color: Kirigami.Theme.disabledTextColor
-                    horizontalAlignment: Text.AlignHCenter
-                    Layout.fillWidth: true
-                }
-            }
+                Repeater {
+                    model: page.sections
 
-            StatusChips {
-                chips: page.device.statusChips ?? []
-                Layout.alignment: Qt.AlignHCenter
-            }
-        }
+                    delegate: QQC2.TabButton {
+                        required property int index
+                        required property var modelData
 
-        FormCard.FormHeader {
-            title: i18nc("@title:group", "Battery")
-        }
-        FormCard.FormCard {
-            FormCard.FormTextDelegate {
-                id: chargeDelegate
-                // The ring shows a percentage; this row only for a device
-                // that reports a voltage or a level alone.
-                visible: (page.device.batteryPercentage ?? -1) < 0 && (page.device.batteryText ?? "") !== ""
-                text: i18nc("@label", "Charge")
-                description: page.device.batteryText ?? ""
-            }
-            FormCard.FormDelegateSeparator {
-                visible: chargeDelegate.visible && levelDelegate.visible
-            }
-            FormCard.FormTextDelegate {
-                id: levelDelegate
-                visible: (page.device.batteryLevelText ?? "") !== ""
-                text: i18nc("@label battery level reported by the device", "Level")
-                description: page.device.batteryLevelText ?? ""
-            }
-            FormCard.FormDelegateSeparator {
-                visible: (chargeDelegate.visible || levelDelegate.visible) && lastSeenDelegate.visible
-            }
-            FormCard.FormTextDelegate {
-                id: lastSeenDelegate
-                visible: (page.device.lastSeenText ?? "") !== ""
-                text: i18nc("@label time of the last answer", "Last answer")
-                description: page.device.lastSeenText ?? ""
-            }
-        }
-
-        FormCard.FormHeader {
-            title: i18nc("@title:group", "Connection")
-        }
-        FormCard.FormCard {
-            FormCard.FormTextDelegate {
-                text: i18nc("@label", "Receiver")
-                description: page.device.receiverText ?? ""
-            }
-            FormCard.FormDelegateSeparator {
-                visible: protocolDelegate.visible
-            }
-            FormCard.FormTextDelegate {
-                id: protocolDelegate
-                visible: Settings.showTechnicalDetails && (page.device.protocol ?? "") !== ""
-                text: i18nc("@label", "Protocol")
-                description: i18nc("@info protocol version", "HID++ %1", page.device.protocol ?? "")
-            }
-        }
-
-        FormCard.FormHeader {
-            title: i18nc("@title:group", "Device")
-            visible: deviceCard.visible
-        }
-        FormCard.FormCard {
-            id: deviceCard
-            visible: (page.device.firmware ?? []).length > 0 || (page.device.dpi ?? 0) > 0 || (page.device.reportRate ?? 0) > 0
-
-            Repeater {
-                model: page.device.firmware ?? []
-
-                delegate: FormCard.FormTextDelegate {
-                    required property var modelData
-                    text: modelData.label
-                    description: modelData.version
+                        text: modelData.text
+                        icon.name: modelData.iconName
+                        onClicked: page.section = index
+                    }
                 }
             }
-            FormCard.FormTextDelegate {
-                visible: (page.device.dpi ?? 0) > 0
-                text: i18nc("@label pointer resolution", "Resolution")
-                description: i18nc("@info dots per inch", "%1 dpi", page.device.dpi ?? 0)
-            }
-            FormCard.FormTextDelegate {
-                visible: (page.device.reportRate ?? 0) > 0
-                text: i18nc("@label", "Report rate")
-                description: i18nc("@info report interval", "Every %1 ms", page.device.reportRate ?? 0)
-            }
-        }
 
-        FormCard.FormHeader {
-            title: i18nc("@title:group", "Features")
-            visible: Settings.showTechnicalDetails
-        }
-        FormCard.FormCard {
-            visible: Settings.showTechnicalDetails
+            StackLayout {
+                currentIndex: page.section
+                Layout.fillWidth: true
+                Layout.fillHeight: true
 
-            FormCard.FormTextDelegate {
-                visible: (page.device.features ?? []).length === 0
-                text: page.device.online ? i18nc("@info", "Reading…") : i18nc("@info", "Read when the device answers")
-            }
-            Repeater {
-                model: page.device.features ?? []
-
-                delegate: FormCard.FormTextDelegate {
-                    required property var modelData
-                    text: modelData.title
-                    description: modelData.detail
+                DeviceOverviewSection {
+                    device: page.device
+                }
+                DeviceDetailsSection {
+                    device: page.device
                 }
             }
         }

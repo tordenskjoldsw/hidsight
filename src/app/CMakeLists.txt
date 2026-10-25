@@ -49,6 +49,8 @@ set(HIDSIGHT_QML_FILES
     ${PROJECT_SOURCE_DIR}/qml/DeviceIllustration.qml
     ${PROJECT_SOURCE_DIR}/qml/Tones.qml
     ${PROJECT_SOURCE_DIR}/qml/Pill.qml
+    ${PROJECT_SOURCE_DIR}/qml/DeviceOverviewSection.qml
+    ${PROJECT_SOURCE_DIR}/qml/DeviceDetailsSection.qml
 )
 set_source_files_properties(${PROJECT_SOURCE_DIR}/qml/Tones.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
