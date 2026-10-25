@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+SPDX-FileCopyrightText: 2026 Tobias Kaminski
+SPDX-License-Identifier: MIT
+
+A generic mouse in pale grey, for dark colour schemes; drawn for Hidsight, no model in particular.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 260">
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+      <feOffset dy="5"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .28 0"/>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="blue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5fc3ff"/><stop offset="1" stop-color="#1d99f3"/>
+    </linearGradient>
+    <linearGradient id="mouse" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fcfcfc"/><stop offset=".5" stop-color="#dfe3e6"/><stop offset="1" stop-color="#a9b1b8"/></linearGradient>
+  </defs>
+  <g filter="url(#shadow)">
+  <path d="M100 18 C150 18 172 60 172 120 C172 190 145 238 100 238 C55 238 28 190 28 120 C28 60 50 18 100 18 Z" fill="url(#mouse)" stroke="#8e98a2" stroke-opacity=".45" stroke-width="1.5"/>
+  <path d="M100 18 V104" stroke="#8e98a2" stroke-width="2"/>
+  <path d="M30 104 C60 112 140 112 170 104" fill="none" stroke="#8e98a2" stroke-width="1.5" opacity=".7"/>
+  <rect x="92" y="40" width="16" height="40" rx="8" fill="#31363b"/>
+  <rect x="95" y="44" width="10" height="32" rx="5" fill="url(#blue)"/>
+  <circle cx="100" cy="196" r="3" fill="url(#blue)"/>
+  </g>
+</svg>

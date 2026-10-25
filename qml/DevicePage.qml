@@ -40,20 +40,34 @@ FormCard.FormCardPage {
             Layout.topMargin: Kirigami.Units.gridUnit
             Layout.bottomMargin: Kirigami.Units.gridUnit
 
-            BatteryRing {
-                fraction: page.device.batteryFraction ?? -1
-                tone: page.device.batteryTone ?? "unknown"
-                iconName: page.device.iconName ?? ""
-                label: (page.device.batteryPercentage ?? -1) >= 0 ? i18nc("@info battery charge", "%1 %", page.device.batteryPercentage) : "–"
+            GridLayout {
+                columns: page.width > Kirigami.Units.gridUnit * 26 ? 2 : 1
+                columnSpacing: Kirigami.Units.gridUnit * 2
+                rowSpacing: Kirigami.Units.largeSpacing
                 opacity: page.device.online ? 1 : 0.5
                 Layout.alignment: Qt.AlignHCenter
-                Layout.preferredWidth: Kirigami.Units.gridUnit * 10
-                Layout.preferredHeight: Kirigami.Units.gridUnit * 10
 
                 Behavior on opacity {
                     NumberAnimation {
                         duration: Kirigami.Units.longDuration
                     }
+                }
+
+                DeviceIllustration {
+                    illustration: page.device.illustration ?? ""
+                    iconName: page.device.iconName ?? ""
+                    Layout.preferredWidth: Kirigami.Units.gridUnit * 14
+                    Layout.preferredHeight: Kirigami.Units.gridUnit * 8
+                    Layout.alignment: Qt.AlignCenter
+                }
+
+                BatteryRing {
+                    fraction: page.device.batteryFraction ?? -1
+                    tone: page.device.batteryTone ?? "unknown"
+                    label: (page.device.batteryPercentage ?? -1) >= 0 ? i18nc("@info battery charge", "%1 %", page.device.batteryPercentage) : "–"
+                    Layout.preferredWidth: Kirigami.Units.gridUnit * 7
+                    Layout.preferredHeight: Kirigami.Units.gridUnit * 7
+                    Layout.alignment: Qt.AlignCenter
                 }
             }
 

@@ -26,12 +26,12 @@ Kirigami.ScrollablePage {
         text: i18nc("@info", "A receiver cannot be opened because the udev rule 70-hidsight.rules is missing.")
     }
 
-    // One row per device across the width; two columns once a row would get
-    // too wide to read.
+    // Cards that fill the width, as many in a row as stay at least 16 grid
+    // units wide.
     GridLayout {
         columnSpacing: Kirigami.Units.largeSpacing
         rowSpacing: Kirigami.Units.largeSpacing
-        columns: width > Kirigami.Units.gridUnit * 70 && cards.count > 1 ? 2 : 1
+        columns: Math.max(1, Math.min(cards.count, Math.floor((width + columnSpacing) / (Kirigami.Units.gridUnit * 16 + columnSpacing))))
 
         Repeater {
             id: cards

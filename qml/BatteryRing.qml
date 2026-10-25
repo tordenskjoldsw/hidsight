@@ -35,18 +35,7 @@ Item {
         }
     }
 
-    property color arcColor: {
-        switch (tone) {
-        case "charging":
-            return Kirigami.Theme.positiveTextColor;
-        case "critical":
-            return Kirigami.Theme.negativeTextColor;
-        case "low":
-            return Kirigami.Theme.neutralTextColor;
-        default:
-            return Kirigami.Theme.highlightColor;
-        }
-    }
+    property color arcColor: Tones.color(tone === "unknown" ? "normal" : tone)
     Behavior on arcColor {
         ColorAnimation {
             duration: Kirigami.Units.longDuration
@@ -95,6 +84,7 @@ Item {
 
         Kirigami.Icon {
             anchors.horizontalCenter: parent.horizontalCenter
+            visible: ring.iconName !== ""
             source: ring.iconName
             width: Math.round(ring.width * 0.38)
             height: width
@@ -103,7 +93,7 @@ Item {
         QQC2.Label {
             anchors.horizontalCenter: parent.horizontalCenter
             text: ring.label
-            font.pixelSize: Math.max(Kirigami.Theme.smallFont.pixelSize, Math.round(ring.width * 0.13))
+            font.pixelSize: Math.max(Kirigami.Theme.smallFont.pixelSize, Math.round(ring.width * (ring.iconName !== "" ? 0.13 : 0.2)))
             font.weight: Font.DemiBold
             color: ring.fraction < 0 ? Kirigami.Theme.disabledTextColor : Kirigami.Theme.textColor
         }

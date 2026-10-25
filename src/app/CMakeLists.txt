@@ -46,7 +46,22 @@ set(HIDSIGHT_QML_FILES
     ${PROJECT_SOURCE_DIR}/qml/BatteryRing.qml
     ${PROJECT_SOURCE_DIR}/qml/DeviceCard.qml
     ${PROJECT_SOURCE_DIR}/qml/StatusChips.qml
+    ${PROJECT_SOURCE_DIR}/qml/DeviceIllustration.qml
+    ${PROJECT_SOURCE_DIR}/qml/Tones.qml
 )
+set_source_files_properties(${PROJECT_SOURCE_DIR}/qml/Tones.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+
+set(HIDSIGHT_ILLUSTRATIONS
+    illustrations/keyboard-dark.svg
+    illustrations/keyboard-light.svg
+    illustrations/mouse-dark.svg
+    illustrations/mouse-light.svg
+)
+set(HIDSIGHT_RESOURCE_FILES)
+foreach(illustration IN LISTS HIDSIGHT_ILLUSTRATIONS)
+    set_source_files_properties(${PROJECT_SOURCE_DIR}/qml/${illustration} PROPERTIES QT_RESOURCE_ALIAS ${illustration})
+    list(APPEND HIDSIGHT_RESOURCE_FILES ${PROJECT_SOURCE_DIR}/qml/${illustration})
+endforeach()
 foreach(qml_file IN LISTS HIDSIGHT_QML_FILES)
     get_filename_component(qml_name ${qml_file} NAME)
     set_source_files_properties(${qml_file} PROPERTIES QT_RESOURCE_ALIAS ${qml_name})
@@ -56,6 +71,7 @@ qt_add_qml_module(hidsight
     URI de.tordenskjold.hidsight
     VERSION 1.0
     QML_FILES ${HIDSIGHT_QML_FILES}
+    RESOURCES ${HIDSIGHT_RESOURCE_FILES}
 )
 
 target_include_directories(hidsight PRIVATE ${PROJECT_BINARY_DIR})
