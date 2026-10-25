@@ -18,6 +18,19 @@ FormCard.FormCardPage {
 
     title: details.present ? device.name : i18nc("@title", "Device")
 
+    // Next to the overview the page has no back button of its own; a narrow
+    // window shows Kirigami's back button instead.
+    actions: [
+        Kirigami.Action {
+            icon.name: "window-close-symbolic"
+            text: i18nc("@action:button close the device page", "Close")
+            displayHint: Kirigami.DisplayHint.IconOnly
+            visible: page.Kirigami.PageStack.pageStack?.wideMode ?? false
+            shortcut: "Escape"
+            onTriggered: page.Kirigami.PageStack.pageStack.removePage(page)
+        }
+    ]
+
     Kirigami.PlaceholderMessage {
         visible: !page.details.present
         icon.name: "preferences-desktop-peripherals"
