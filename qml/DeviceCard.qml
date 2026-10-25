@@ -105,22 +105,8 @@ Kirigami.AbstractCard {
                 Layout.minimumWidth: Kirigami.Units.gridUnit * 3
             }
 
-            // The kind as a quiet outlined label next to the name.
-            Rectangle {
-                implicitWidth: kindLabel.implicitWidth + Kirigami.Units.largeSpacing * 2
-                implicitHeight: kindLabel.implicitHeight + Kirigami.Units.smallSpacing
-                radius: height / 2
-                color: "transparent"
-                border.width: 1
-                border.color: Kirigami.ColorUtils.linearInterpolation(Kirigami.Theme.backgroundColor, Kirigami.Theme.textColor, 0.25)
-
-                QQC2.Label {
-                    id: kindLabel
-                    anchors.centerIn: parent
-                    text: card.kindText
-                    font: Kirigami.Theme.smallFont
-                    color: Kirigami.Theme.disabledTextColor
-                }
+            Pill {
+                text: card.kindText
             }
 
             Item {
