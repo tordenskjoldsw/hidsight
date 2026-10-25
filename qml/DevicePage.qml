@@ -18,18 +18,38 @@ FormCard.FormCardPage {
 
     title: details.present ? device.name : i18nc("@title", "Device")
 
-    // Next to the overview the page has no back button of its own; a narrow
-    // window shows Kirigami's back button instead.
-    actions: [
-        Kirigami.Action {
-            icon.name: "window-close-symbolic"
-            text: i18nc("@action:button close the device page", "Close")
-            displayHint: Kirigami.DisplayHint.IconOnly
-            visible: page.Kirigami.PageStack.pageStack?.wideMode ?? false
-            shortcut: "Escape"
-            onTriggered: page.Kirigami.PageStack.pageStack.removePage(page)
+    function goBack() {
+        page.Kirigami.PageStack.pageStack.removePage(page);
+    }
+
+    titleDelegate: RowLayout {
+        spacing: Kirigami.Units.largeSpacing
+
+        QQC2.ToolButton {
+            icon.name: "go-previous-symbolic"
+            text: i18nc("@action:button back to the device overview", "Devices")
+            display: QQC2.AbstractButton.TextBesideIcon
+            onClicked: page.goBack()
         }
-    ]
+
+        Kirigami.Heading {
+            text: page.title
+            level: 1
+            elide: Text.ElideRight
+            Layout.fillWidth: true
+        }
+    }
+
+    Shortcut {
+        sequences: ["Escape", StandardKey.Back]
+        onActivated: page.goBack()
+    }
+
+    // The back button of a mouse.
+    TapHandler {
+        acceptedButtons: Qt.BackButton
+        onTapped: page.goBack()
+    }
 
     Kirigami.PlaceholderMessage {
         visible: !page.details.present

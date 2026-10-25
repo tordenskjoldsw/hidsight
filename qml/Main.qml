@@ -27,6 +27,10 @@ Kirigami.ApplicationWindow {
         id: devicesPage
     }
     pageStack.globalToolBar.style: Kirigami.ApplicationHeaderStyle.ToolBar
+    // One page at a time, as in OpenLogi: a device page replaces the overview,
+    // and its own "Devices" button leads back.
+    pageStack.columnView.columnResizeMode: Kirigami.ColumnView.SingleColumn
+    pageStack.globalToolBar.showNavigationButtons: Kirigami.ApplicationHeaderStyle.NoNavigationButtons
 
     // The app-wide actions, the same on every page, also when a narrow window
     // shows only a device.
