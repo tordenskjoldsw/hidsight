@@ -35,8 +35,14 @@ public:
         ExternalPowerRole,
         BatteryTextRole,
         BatteryIconNameRole,
+        // 0 to 1 for the ring; -1 without a reading.
+        BatteryFractionRole,
+        BatteryToneRole,
+        StatusChipsRole,
         LastSeenTextRole,
         FirmwareRole,
+        // The version of the main application firmware alone.
+        FirmwareVersionRole,
         DpiRole,
         ReportRateRole,
         ProtocolRole,
@@ -62,6 +68,7 @@ public:
     // The devices in row order, for the tray.
     std::vector<hidpp::DeviceState> states() const;
     QStringList keysOf(const QString &receiver) const;
+    Q_INVOKABLE QString keyAt(int row) const;
 
     void updateDevice(const QString &receiver, const QString &receiverId, const hidpp::DeviceState &state);
     void removeDevice(const QString &receiver, std::uint8_t index);

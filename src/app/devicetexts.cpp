@@ -184,32 +184,105 @@ QString batteryText(const Battery &battery)
     return charge;
 }
 
+std::optional<int> chargeEstimate(const Battery &battery)
+{
+    if (battery.percentage) {
+        return *battery.percentage;
+    }
+    switch (battery.level) {
+    case BatteryLevel::Full:
+        return 100;
+    case BatteryLevel::Good:
+        return 60;
+    case BatteryLevel::Low:
+        return 20;
+    case BatteryLevel::Critical:
+        return 0;
+    case BatteryLevel::Unknown:
+        break;
+    }
+    return std::nullopt;
+}
+
+QString batteryTone(const DeviceState &state)
+{
+    if (state.status != DeviceStatus::Online || !state.battery || !chargeEstimate(*state.battery)) {
+        return u"unknown"_s;
+    }
+    const Battery &battery = *state.battery;
+    if (battery.charging == ChargingState::Charging || battery.charging == ChargingState::ChargingSlowly || battery.charging == ChargingState::Complete) {
+        return u"charging"_s;
+    }
+    if (battery.level == BatteryLevel::Critical) {
+        return u"critical"_s;
+    }
+    if (battery.level == BatteryLevel::Low) {
+        return u"low"_s;
+    }
+    return u"normal"_s;
+}
+
+QVariantList statusChips(const DeviceState &state)
+{
+    const auto chip = [](const QString &text, const QString &iconName) {
+        return QVariantMap{{u"text"_s, text}, {u"iconName"_s, iconName}};
+    };
+    QVariantList chips;
+    switch (state.status) {
+    case DeviceStatus::Reading:
+        chips << chip(i18nc("@info:status", "Reading"), u"view-refresh-symbolic"_s);
+        return chips;
+    case DeviceStatus::Unreachable:
+        chips << chip(i18nc("@info:status", "Not connected"), u"network-disconnect-symbolic"_s);
+        return chips;
+    case DeviceStatus::Online:
+        break;
+    }
+    if (!state.battery) {
+        return chips;
+    }
+    const Battery &battery = *state.battery;
+    // At most two chips: how the battery charges, and how low it is when it
+    // does not. Charging implies the cable, so the cable chip only stands for
+    // a cable without charging.
+    switch (battery.charging) {
+    case ChargingState::Charging:
+        chips << chip(i18nc("@info:status", "Charging"), u"battery-100-charging-symbolic"_s);
+        return chips;
+    case ChargingState::ChargingSlowly:
+        chips << chip(i18nc("@info:status", "Charging slowly"), u"battery-100-charging-symbolic"_s);
+        return chips;
+    case ChargingState::Complete:
+        chips << chip(i18nc("@info:status", "Fully charged"), u"battery-full-charged-symbolic"_s);
+        return chips;
+    case ChargingState::Error:
+        chips << chip(i18nc("@info:status", "Charging error"), u"emblem-error-symbolic"_s);
+        return chips;
+    case ChargingState::Discharging:
+    case ChargingState::Unknown:
+        break;
+    }
+    if (battery.externalPower.value_or(false)) {
+        chips << chip(i18nc("@info:status", "On cable"), u"network-connect-symbolic"_s);
+    }
+    if (battery.level == BatteryLevel::Critical) {
+        chips << chip(i18nc("@info:status", "Battery critical"), u"battery-caution-symbolic"_s);
+    } else if (battery.level == BatteryLevel::Low) {
+        chips << chip(i18nc("@info:status", "Battery low"), u"battery-low-symbolic"_s);
+    }
+    return chips;
+}
+
 QString batteryIconName(const std::optional<Battery> &battery)
 {
     if (!battery) {
         return u"battery-missing"_s;
     }
-    int percentage = -1;
-    if (battery->percentage) {
-        percentage = *battery->percentage;
-    } else {
-        switch (battery->level) {
-        case BatteryLevel::Full:
-            percentage = 100;
-            break;
-        case BatteryLevel::Good:
-            percentage = 60;
-            break;
-        case BatteryLevel::Low:
-            percentage = 20;
-            break;
-        case BatteryLevel::Critical:
-            percentage = 0;
-            break;
-        case BatteryLevel::Unknown:
-            return u"battery-missing"_s;
-        }
+    const auto estimate = chargeEstimate(*battery);
+    if (!estimate) {
+        return u"battery-missing"_s;
     }
+    const int percentage = *estimate;
     // Breeze has an icon for every ten percent.
     const int step = (percentage + 5) / 10 * 10;
     const bool charging = battery->charging == ChargingState::Charging || battery->charging == ChargingState::ChargingSlowly;

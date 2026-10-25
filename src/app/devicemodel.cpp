@@ -103,10 +103,27 @@ QVariant DeviceModel::data(const QModelIndex &index, int role) const
         return state.battery ? DeviceTexts::batteryText(*state.battery) : QString();
     case BatteryIconNameRole:
         return DeviceTexts::batteryIconName(state.battery);
+    case BatteryFractionRole: {
+        const auto estimate = state.battery ? DeviceTexts::chargeEstimate(*state.battery) : std::nullopt;
+        return estimate ? *estimate / 100.0 : -1.0;
+    }
+    case BatteryToneRole:
+        return DeviceTexts::batteryTone(state);
+    case StatusChipsRole:
+        return DeviceTexts::statusChips(state);
     case LastSeenTextRole:
         return DeviceTexts::lastSeenText(state.lastSeen);
     case FirmwareRole:
         return firmware(state);
+    case FirmwareVersionRole:
+        if (state.firmware) {
+            for (const hidpp::FirmwareEntry &entry : state.firmware->entries) {
+                if (entry.type == hidpp::FirmwareType::MainApplication) {
+                    return entry.version();
+                }
+            }
+        }
+        return QString();
     case DpiRole:
         return state.dpi && !state.dpi->sensorDpi.empty() ? int(state.dpi->sensorDpi.front()) : 0;
     case ReportRateRole:
@@ -146,8 +163,12 @@ QHash<int, QByteArray> DeviceModel::roleNames() const
         {ExternalPowerRole, "externalPower"},
         {BatteryTextRole, "batteryText"},
         {BatteryIconNameRole, "batteryIconName"},
+        {BatteryFractionRole, "batteryFraction"},
+        {BatteryToneRole, "batteryTone"},
+        {StatusChipsRole, "statusChips"},
         {LastSeenTextRole, "lastSeenText"},
         {FirmwareRole, "firmware"},
+        {FirmwareVersionRole, "firmwareVersion"},
         {DpiRole, "dpi"},
         {ReportRateRole, "reportRate"},
         {ProtocolRole, "protocol"},
@@ -182,6 +203,14 @@ std::vector<hidpp::DeviceState> DeviceModel::states() const
         states.push_back(row.state);
     }
     return states;
+}
+
+QString DeviceModel::keyAt(int row) const
+{
+    if (row < 0 || row >= count()) {
+        return {};
+    }
+    return keyFor(m_rows[std::size_t(row)].receiver, m_rows[std::size_t(row)].state.index);
 }
 
 QStringList DeviceModel::keysOf(const QString &receiver) const

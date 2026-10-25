@@ -6,6 +6,9 @@
 #include "hidpp/receiversession.h"
 
 #include <QString>
+#include <QVariantList>
+
+#include <optional>
 
 // The translated words and Breeze icon names the UI shows for a device, so
 // QML only places them.
@@ -16,6 +19,15 @@ QString kindText(hidpp::DeviceKind kind);
 QString kindIconName(hidpp::DeviceKind kind);
 
 QString batteryText(const hidpp::Battery &battery);
+// The charge in percent, from the percentage or from the reported level;
+// nothing when the device tells neither.
+std::optional<int> chargeEstimate(const hidpp::Battery &battery);
+// How the battery is drawn: "charging", "critical", "low", "normal", or
+// "unknown" for a device without a reading.
+QString batteryTone(const hidpp::DeviceState &state);
+// Short states for chips, each {text, iconName}, at most two: how the
+// battery charges, or the cable and how low it is; not connected.
+QVariantList statusChips(const hidpp::DeviceState &state);
 QString batteryIconName(const std::optional<hidpp::Battery> &battery);
 QString chargingText(hidpp::ChargingState state);
 QString levelText(hidpp::BatteryLevel level);

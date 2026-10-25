@@ -13,32 +13,6 @@
 using namespace Qt::StringLiterals;
 using hidpp::BatteryLevel;
 
-namespace
-{
-
-// A charge to compare devices by: the percentage, or the reported level.
-std::optional<int> charge(const hidpp::Battery &battery)
-{
-    if (battery.percentage) {
-        return *battery.percentage;
-    }
-    switch (battery.level) {
-    case BatteryLevel::Full:
-        return 100;
-    case BatteryLevel::Good:
-        return 60;
-    case BatteryLevel::Low:
-        return 20;
-    case BatteryLevel::Critical:
-        return 0;
-    case BatteryLevel::Unknown:
-        break;
-    }
-    return std::nullopt;
-}
-
-} // namespace
-
 TrayLook TrayLook::forDevices(const std::vector<hidpp::DeviceState> &devices)
 {
     TrayLook look;
@@ -62,7 +36,7 @@ TrayLook TrayLook::forDevices(const std::vector<hidpp::DeviceState> &devices)
         if (state.battery->level == BatteryLevel::Critical) {
             look.status = Status::NeedsAttention;
         }
-        const auto value = charge(*state.battery);
+        const auto value = DeviceTexts::chargeEstimate(*state.battery);
         if (value && (!weakestCharge || *value < *weakestCharge)) {
             weakest = &state;
             weakestCharge = value;
