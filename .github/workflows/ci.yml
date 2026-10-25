@@ -15,6 +15,11 @@ env:
     base-devel git cmake extra-cmake-modules ninja clang
     qt6-base qt6-declarative kirigami kirigami-addons ki18n kconfig kcoreaddons kdbusaddons knotifications kstatusnotifieritem qqc2-desktop-style systemd-libs
     appstream desktop-file-utils
+  # The archlinux image lists two mirrors only, and the first one dropped
+  # downloads in CI; pacman moves on to these, and the install is retried.
+  MIRRORS: >-
+    https://mirrors.kernel.org/archlinux
+    https://mirror.rackspace.com/archlinux
 
 jobs:
   build:
@@ -27,7 +32,13 @@ jobs:
         preset: [debug, asan]
     steps:
       - name: Install dependencies
-        run: pacman -Syu --noconfirm --needed $BUILD_DEPS
+        run: |
+          printf 'Server = %s/$repo/os/$arch\n' $MIRRORS >> /etc/pacman.d/mirrorlist
+          for attempt in 1 2 3; do
+            pacman -Syu --noconfirm --needed $BUILD_DEPS && break
+            [ "$attempt" -lt 3 ] && sleep 30
+          done
+          pacman -T $BUILD_DEPS > /dev/null
       - uses: actions/checkout@v5
       - name: Configure
         run: cmake --preset ${{ matrix.preset }}
@@ -48,7 +59,13 @@ jobs:
     container: archlinux:latest
     steps:
       - name: Install dependencies
-        run: pacman -Syu --noconfirm --needed $BUILD_DEPS
+        run: |
+          printf 'Server = %s/$repo/os/$arch\n' $MIRRORS >> /etc/pacman.d/mirrorlist
+          for attempt in 1 2 3; do
+            pacman -Syu --noconfirm --needed $BUILD_DEPS && break
+            [ "$attempt" -lt 3 ] && sleep 30
+          done
+          pacman -T $BUILD_DEPS > /dev/null
       - uses: actions/checkout@v5
       - name: Build the package as an unprivileged user
         run: |
@@ -62,7 +79,13 @@ jobs:
     container: archlinux:latest
     steps:
       - name: Install reuse
-        run: pacman -Syu --noconfirm --needed git reuse
+        run: |
+          printf 'Server = %s/$repo/os/$arch\n' $MIRRORS >> /etc/pacman.d/mirrorlist
+          for attempt in 1 2 3; do
+            pacman -Syu --noconfirm --needed git reuse && break
+            [ "$attempt" -lt 3 ] && sleep 30
+          done
+          pacman -T git reuse > /dev/null
       - uses: actions/checkout@v5
       - name: Lint licensing
         run: |
