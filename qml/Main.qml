@@ -17,7 +17,15 @@ Kirigami.ApplicationWindow {
     minimumWidth: Kirigami.Units.gridUnit * 20
     minimumHeight: Kirigami.Units.gridUnit * 15
 
-    pageStack.initialPage: DevicesPage {}
+    // Opens the device page of the card in this row; used by developer
+    // builds to take screenshots (hidsight --grab --open).
+    function showDevice(row: int) {
+        devicesPage.openDevice(DeviceManager.devices.keyAt(row));
+    }
+
+    pageStack.initialPage: DevicesPage {
+        id: devicesPage
+    }
     pageStack.globalToolBar.style: Kirigami.ApplicationHeaderStyle.ToolBar
 
     // The app-wide actions, the same on every page, also when a narrow window

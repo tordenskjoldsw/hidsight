@@ -31,6 +31,11 @@ void DeviceManager::start()
     Q_EMIT watchingChanged();
 }
 
+void DeviceManager::setSoftwareId(std::uint8_t softwareId)
+{
+    m_softwareId = softwareId;
+}
+
 DeviceModel *DeviceManager::devices()
 {
     return &m_model;
@@ -71,7 +76,9 @@ void DeviceManager::addNode(const QString &node, const QString &receiverId)
         return;
     }
     setDenied(node, false);
-    attach(node, receiverId, std::make_unique<hidpp::ReceiverSession>(std::move(channel).value()));
+    auto session = std::make_unique<hidpp::ReceiverSession>(std::move(channel).value());
+    session->setSoftwareId(m_softwareId);
+    attach(node, receiverId, std::move(session));
 }
 
 void DeviceManager::attach(const QString &node, const QString &receiverId, std::unique_ptr<hidpp::ReceiverSession> session)

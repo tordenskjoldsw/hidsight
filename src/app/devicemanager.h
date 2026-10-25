@@ -7,6 +7,8 @@
 #include "devicemonitor.h"
 #include "devicenames.h"
 
+#include "hidpp/report.h"
+
 #include <QObject>
 #include <QSet>
 
@@ -37,6 +39,8 @@ public:
     ~DeviceManager() override;
 
     void start();
+    // For the sessions of receivers found from now on; see Dispatcher.
+    void setSoftwareId(std::uint8_t softwareId);
 
     DeviceModel *devices();
     bool accessDenied() const;
@@ -76,4 +80,5 @@ private:
     std::map<QString, QString> m_receiverIds;
     QSet<QString> m_deniedNodes;
     bool m_watching = false;
+    std::uint8_t m_softwareId = hidpp::DefaultSoftwareId;
 };

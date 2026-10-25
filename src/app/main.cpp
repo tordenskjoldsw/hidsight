@@ -11,6 +11,9 @@
 #include <QQmlApplicationEngine>
 #include <QQuickStyle>
 #include <QQuickWindow>
+#include <QTimer>
+
+#include <optional>
 
 #include "appsettings.h"
 #include "autostart.h"
@@ -31,6 +34,36 @@ void showWindow(QQuickWindow *window)
     window->raise();
     window->requestActivate();
 }
+
+#ifdef HIDSIGHT_DEVELOPER
+// For screenshots without a desktop (QT_QPA_PLATFORM=offscreen): waits for
+// the first reads, opens a device page if asked, lets the animations end and
+// saves the window.
+void grabWindow(QQuickWindow *window, const QString &path, const QString &openRow, const QString &size)
+{
+    const QStringList parts = size.split(u'x');
+    if (parts.size() == 2) {
+        window->resize(parts[0].toInt(), parts[1].toInt());
+    }
+    window->show();
+    QTimer::singleShot(std::chrono::milliseconds(4000), window, [window, path, openRow] {
+        // The virtual pointer of the offscreen platform rests at 0,0, over
+        // the menu button, whose tooltip would end up in the picture.
+        QEvent leave(QEvent::Leave);
+        QCoreApplication::sendEvent(window, &leave);
+        if (!openRow.isEmpty()) {
+            if (!QMetaObject::invokeMethod(window, "showDevice", Q_ARG(int, openRow.toInt()))) {
+                qWarning() << "cannot open the device in row" << openRow;
+            }
+        }
+        QTimer::singleShot(std::chrono::milliseconds(1500), window, [window, path] {
+            const bool saved = window->grabWindow().save(path);
+            qInfo().noquote() << (saved ? "saved" : "could not save") << path;
+            QCoreApplication::exit(saved ? 0 : 1);
+        });
+    });
+}
+#endif
 
 } // namespace
 
@@ -72,12 +105,31 @@ int main(int argc, char *argv[])
                                           i18n("Show the devices of a capture <file> instead of the receivers (developer builds)."),
                                           i18nc("@info command line value", "file"));
     parser.addOption(replayOption);
+    const QCommandLineOption grabOption(u"grab"_s,
+                                        i18n("Save a picture of the window to <file> once the devices are read, then quit (developer builds)."),
+                                        i18nc("@info command line value", "file"));
+    const QCommandLineOption openOption(u"open"_s,
+                                        i18n("With --grab, open the device page of the card in <row> first."),
+                                        i18nc("@info command line value", "row"));
+    const QCommandLineOption sizeOption(u"size"_s,
+                                        i18n("With --grab, the size of the window, for example 1100x720."),
+                                        i18nc("@info command line value", "size"));
+    parser.addOptions({grabOption, openOption, sizeOption});
 #endif
     parser.process(app);
     about.processCommandLine(&parser);
 
     // One Hidsight per session: a second start shows the window of the first.
-    KDBusService service(KDBusService::Unique);
+    // Developer runs stay apart, so they neither end in nor disturb the
+    // Hidsight that is already running.
+    bool developerRun = false;
+#ifdef HIDSIGHT_DEVELOPER
+    developerRun = parser.isSet(replayOption) || parser.isSet(grabOption);
+#endif
+    std::optional<KDBusService> service;
+    if (!developerRun) {
+        service.emplace(KDBusService::Unique);
+    }
 
     AppSettings settings;
     Autostart autostart;
@@ -91,6 +143,11 @@ int main(int argc, char *argv[])
             return 1;
         }
     } else {
+        // Apart from the installed Hidsight on the same receiver (0x0A) and
+        // from hidsight-cli (0x0B), so neither takes the other's replies.
+        if (developerRun) {
+            devices.setSoftwareId(0x0C);
+        }
         devices.start();
     }
 #else
@@ -98,7 +155,15 @@ int main(int argc, char *argv[])
 #endif
 
     BatteryTray tray(devices.devices());
-    Notifier notifier(&devices, &settings);
+    // A screenshot run must not send notifications to the desktop it runs on.
+    bool grabbing = false;
+#ifdef HIDSIGHT_DEVELOPER
+    grabbing = parser.isSet(grabOption);
+#endif
+    std::optional<Notifier> notifier;
+    if (!grabbing) {
+        notifier.emplace(&devices, &settings);
+    }
 
     QQmlApplicationEngine engine;
     KLocalization::setupLocalizedContext(&engine);
@@ -108,9 +173,17 @@ int main(int argc, char *argv[])
         return 1;
     }
     tray.setWindow(window);
-    QObject::connect(&service, &KDBusService::activateRequested, window, [window] {
-        showWindow(window);
-    });
+    if (service) {
+        QObject::connect(&*service, &KDBusService::activateRequested, window, [window] {
+            showWindow(window);
+        });
+    }
+#ifdef HIDSIGHT_DEVELOPER
+    if (parser.isSet(grabOption)) {
+        grabWindow(window, parser.value(grabOption), parser.value(openOption), parser.value(sizeOption));
+        return app.exec();
+    }
+#endif
     if (!parser.isSet(backgroundOption) && !settings.startHidden()) {
         showWindow(window);
     }
